@@ -9,5 +9,8 @@ app.use(cors());
 app.use(express.json());
 app.use(morgan("dev"));
 
+app.get("/api/health", (req, res) => {
+  res.send({ status: "ok" });
+});
 
 export default app;
