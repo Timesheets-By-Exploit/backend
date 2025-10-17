@@ -1,5 +1,1 @@
-export const orgFixtures = {
-  validOrg: {
-    name: "Startup & Co.",
-  },
-};
+export const orgFixtures = {};

@@ -1,12 +1,11 @@
 
 import mongoose from "mongoose";
-import { MongoMemoryServer } from "mongodb-memory-server";
-import request from "supertest";
+import { MongoMemoryReplSet } from "mongodb-memory-server";
 
-let mongo: MongoMemoryServer;
+let mongo: MongoMemoryReplSet;
 
 beforeAll(async () => {
-  mongo = await MongoMemoryServer.create();
+  mongo = await MongoMemoryReplSet.create();
   const uri = mongo.getUri();
   await mongoose.connect(uri);
 });

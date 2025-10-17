@@ -1,20 +1,17 @@
+import { faker } from "@faker-js/faker";
+
 export const userFixtures = {
-  validOwner: {
-    email: "owner@example.com",
-    password: "StrongPass123!",
-    name: "Test Owner",
+  noEmail: {
+    name: "John Doe",
+    password: "SecurePass123",
   },
   noPassword: {
-    email: "nopass@example.com",
-    name: "No Password User",
-  },
-  noEmail: {
-    password: "StrongPass123!",
-    name: "Invalid Email User",
+    name: "John Doe",
+    email: "john@example.com",
   },
   invalidEmail: {
+    name: "Test User",
     email: "not-an-email",
-    password: "StrongPass123!",
-    name: "Invalid Email User",
+    password: "SomePass123",
   },
 };

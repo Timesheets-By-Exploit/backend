@@ -15,7 +15,18 @@
 
     "sourceMap": true,
     "declaration": true,
-    "declarationMap": true
+    "declarationMap": true,
+
+    "baseUrl": "./",
+    "paths": {
+      "@app": ["src/app"],
+      "@server": ["src/server"],
+      "@tests/*": ["src/tests/*"],
+      "@utils/*": ["src/utils/*"],
+      "@modules/*": ["src/modules/*"],
+      "@config/*": ["src/config/*"],
+      "@middlewares/*": ["src/middlewares/*"]
+    }
   },
   "include": ["src", "tests"]
 }
