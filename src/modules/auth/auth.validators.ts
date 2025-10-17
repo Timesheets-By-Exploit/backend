@@ -1,0 +1,13 @@
+import { z } from "zod";
+
+export const signupSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters long"),
+  email: z.string().email("Invalid email format"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  organizationName: z
+    .string()
+    .min(2, "Organization name must be at least 2 characters"),
+  organizationSize: z.number().int().min(1),
+});
+
+export type SignupInput = z.infer<typeof signupSchema>;
