@@ -7,7 +7,14 @@ const AuthService = {
   signupOwner: async (
     input: SignupInput,
   ): Promise<ISignupPayload | IErrorPayload> => {
-    const { name, email, password, organizationName, organizationSize } = input;
+    const {
+      firstName,
+      lastName,
+      email,
+      password,
+      organizationName,
+      organizationSize,
+    } = input;
     const existingUser = await UserModel.exists({ email });
     if (existingUser) return { success: false, error: "User already exists" };
 
@@ -15,7 +22,8 @@ const AuthService = {
     session.startTransaction();
     try {
       const createdUser = new UserModel({
-        name,
+        firstName,
+        lastName,
         email,
         password,
         role: "owner",
@@ -32,7 +40,10 @@ const AuthService = {
       session.endSession();
       return {
         success: true,
-        data: { userId: createdUser._id, organizationId: organization._id },
+        data: {
+          userId: createdUser._id.toString(),
+          organizationId: organization._id.toString(),
+        },
       };
     } catch (err) {
       await session.abortTransaction();

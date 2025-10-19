@@ -34,6 +34,26 @@ describe("Auth Signup", () => {
 
     expect(res.status).toBe(400);
   });
+  it("should return 400 if last name is missing", async () => {
+    const res = await request(app)
+      .post("/api/v1/auth/signup")
+      .send({
+        ...userFixtures.noFirstName,
+        ...OrganizationFactory.generate(),
+      });
+
+    expect(res.status).toBe(400);
+  });
+  it("should return 400 if last name is missing", async () => {
+    const res = await request(app)
+      .post("/api/v1/auth/signup")
+      .send({
+        ...userFixtures.noLastName,
+        ...OrganizationFactory.generate(),
+      });
+
+    expect(res.status).toBe(400);
+  });
   it("should return 400 if email is invalid", async () => {
     const res = await request(app)
       .post("/api/v1/auth/signup")

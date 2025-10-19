@@ -17,5 +17,6 @@ export default {
     "^@config/(.*)$": "<rootDir>/src/config/$1",
     "^@tests/(.*)$": "<rootDir>/src/tests/$1",
     "^@middlewares/(.*)$": "<rootDir>/src/middlewares/$1",
+    "^@docs/(.*)$": "<rootDir>/src/docs/$1",
   },
 };

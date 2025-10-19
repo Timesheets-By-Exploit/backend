@@ -1,13 +1,24 @@
-import { faker } from "@faker-js/faker";
 
 export const userFixtures = {
   noEmail: {
-    name: "John Doe",
+    firstName: "John",
+    lastName: "Doe",
+    password: "SecurePass123",
+  },
+  noFirstName: {
+    lastName: "Doe",
+    email: "johndoe@mail.com",
+    password: "SecurePass123",
+  },
+  noLastName: {
+    firstName: "John",
+    email: "johndoe@mail.com",
     password: "SecurePass123",
   },
   noPassword: {
-    name: "John Doe",
-    email: "john@example.com",
+    firstName: "John",
+    lastName: "Doe",
+    email: "johndoe@mail.com",
   },
   invalidEmail: {
     name: "Test User",

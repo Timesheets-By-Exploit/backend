@@ -4,7 +4,8 @@ export type Role = "owner" | "admin" | "member" | "viewer";
 
 export interface IUser extends mongoose.Document {
   _id: mongoose.Types.ObjectId;
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   password: string;
   role: Role;

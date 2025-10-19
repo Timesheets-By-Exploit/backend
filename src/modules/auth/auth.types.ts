@@ -11,7 +11,7 @@ export interface IErrorPayload {
 export interface ISignupPayload {
   success: boolean;
   data: {
-    userId: mongoose.Types.ObjectId;
-    organizationId: mongoose.Types.ObjectId;
+    userId: string;
+    organizationId: string;
   };
 }
