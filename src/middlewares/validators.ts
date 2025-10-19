@@ -12,7 +12,14 @@ const validateResource =
       return next(
         AppError.badRequest(
           "Validation failed",
-          e.errors.map((err: any) => err.message),
+          (e.errors as Array<{ path: string; message: string }>).reduce(
+            (acc: string, err: any, idx: number) =>
+              acc +
+              `Error on path ${err.path}: ${err.message}${
+                idx !== e.errors.length - 1 ? ", " : ""
+              }`,
+            "",
+          ),
         ),
       );
     }
