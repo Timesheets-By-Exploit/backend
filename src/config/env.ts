@@ -26,7 +26,7 @@ const env = isTest
 
 if (!env.success) {
   console.error("❌ Invalid environment variables:", env.error?.format());
-  process.exit(1); // Exit if validation fails
+  process.exit(1);
 }
 
 export const { PORT, MONGODB_URI, JWT_SECRET, NODE_ENV } = env.data;
