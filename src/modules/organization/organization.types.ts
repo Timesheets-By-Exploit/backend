@@ -5,6 +5,7 @@ type Status = "active" | "inactive";
 export interface IOrganization extends mongoose.Document {
   _id: mongoose.Types.ObjectId;
   name: string;
+  slug: string;
   owner: mongoose.Schema.Types.ObjectId;
   domain?: string;
   description?: string;

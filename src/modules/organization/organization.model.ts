@@ -1,16 +1,17 @@
-import mongoose from "mongoose";
+import mongoose, { model } from "mongoose";
 import { IOrganization } from "./organization.types";
+import { slugify } from "@utils/index";
 
 const organizationSchema = new mongoose.Schema<IOrganization>(
   {
     name: {
       type: String,
-      required: [true, "An organization must have a name"],
-      unique: true,
+      required: true,
       trim: true,
-      minlength: [2, "Name must be at least 2 characters"],
-      maxlength: [50, "Name cannot exceed 50 characters"],
+      minlength: 2,
+      maxlength: 50,
     },
+    slug: { type: String, required: true, unique: true },
     owner: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -34,6 +35,24 @@ const organizationSchema = new mongoose.Schema<IOrganization>(
   },
   { timestamps: true },
 );
+
+
+organizationSchema.pre("validate", async function (next) {
+  if (!this.isModified("name")) return next();
+
+  const baseSlug = slugify(this.name);
+  let slug = baseSlug;
+  let counter = 1;
+
+  while (await model("Organization").exists({ slug })) {
+    slug = `${baseSlug}-${counter}`;
+    counter++;
+  }
+
+  this.slug = slug;
+  next();
+});
+
 
 const OrganizationModel = mongoose.model<IOrganization>(
   "Organization",
