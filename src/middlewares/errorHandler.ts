@@ -16,8 +16,9 @@ const errorHandler = (err: any, _req: Request, res: Response) => {
 
   return res.status(500).json({
     success: false,
-    error: "Something went wrong",
-    details: process.env.NODE_ENV === "development" ? err.stack : undefined,
+    error: message || "Something went wrong",
+    details,
+    stack: process.env.NODE_ENV === "development" ? err.stack : details,
   });
 };
 
