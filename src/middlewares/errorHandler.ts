@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import AppError from "../utils/AppError";
+import { NODE_ENV } from "@config/env";
 
 const errorHandler = (err: any, _req: Request, res: Response) => {
   let statusCode = err.statusCode || 500;
@@ -18,7 +19,7 @@ const errorHandler = (err: any, _req: Request, res: Response) => {
     success: false,
     error: message || "Something went wrong",
     details,
-    stack: process.env.NODE_ENV === "development" ? err.stack : details,
+    stack: NODE_ENV === "development" ? err.stack : details,
   });
 };
 
