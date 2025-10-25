@@ -13,4 +13,9 @@ export interface IUser extends mongoose.Document {
   organization: mongoose.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
+  isEmailVerified: boolean;
+  emailVerificationCode: string;
+  emailVerificationCodeExpiry: Date;
+  generateEmailVerificationCode: () => string;
+  verifyEmailVerificationCode: (code: string) => boolean;
 }

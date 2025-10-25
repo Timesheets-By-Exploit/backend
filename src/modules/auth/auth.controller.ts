@@ -1,7 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import AuthService from "./auth.service";
-import { IErrorPayload, ISignupPayload, SignupInput } from "./auth.types";
+import { SignupInput, SignupOutput } from "./auth.types";
 import AppError from "@utils/AppError";
+import { IErrorPayload, ISuccessPayload } from "src/types";
 
 export const signupOrganizationOwner = async (
   req: Request,
@@ -21,7 +22,7 @@ export const signupOrganizationOwner = async (
     return res.status(201).json({
       success: true,
       message: "Owner signup successful",
-      data: (result as ISignupPayload).data,
+      data: (result as ISuccessPayload<SignupOutput>).data,
     });
   } catch (err) {
     next(err);

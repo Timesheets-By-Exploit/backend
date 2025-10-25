@@ -1,17 +1,12 @@
-import mongoose from "mongoose";
 import { signupSchema } from "./auth.validators";
 import { z } from "zod";
 
 export type SignupInput = z.infer<typeof signupSchema>;
 
-export interface IErrorPayload {
-  success: boolean;
-  error: string;
-}
-export interface ISignupPayload {
-  success: boolean;
-  data: {
-    userId: string;
-    organizationId: string;
-  };
-}
+export type SignupOutput = {
+  organizationId: string;
+  userId: string;
+  emailSent: boolean;
+};
+
+export type EmailVerificationOutput = { emailSent: boolean };

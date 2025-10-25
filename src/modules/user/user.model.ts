@@ -1,7 +1,8 @@
 // src/modules/auth/auth.model.ts
 import mongoose, { CallbackError, Schema } from "mongoose";
 import { IUser } from "./user.types";
-import bcrypt from "bcryptjs";
+import { hashWithBcrypt, hashWithCrypto } from "@utils/encryptors";
+import { convertTimeToMilliseconds } from "@utils/index";
 
 const userSchema = new Schema<IUser>(
   {
@@ -21,6 +22,9 @@ const userSchema = new Schema<IUser>(
         return this.role === "member";
       },
     },
+    isEmailVerified: { type: Boolean, default: false },
+    emailVerificationCode: { type: String, default: null },
+    emailVerificationCodeExpiry: { type: Date, default: null },
   },
   { timestamps: true },
 );
@@ -31,13 +35,27 @@ userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
 
   try {
-    const salt = await bcrypt.genSalt(10);
-    thisObj.password = await bcrypt.hash(thisObj.password, salt);
+    thisObj.password = await hashWithBcrypt(thisObj.password);
     return next();
   } catch (e) {
     return next(e as CallbackError);
   }
 });
+
+userSchema.pre("save", async function (next) {
+  const thisObj = this as IUser;
+  if (!this.isModified("emailVerificationCode")) return next();
+  thisObj.emailVerificationCodeExpiry = new Date(
+    Date.now() + convertTimeToMilliseconds(30, "minutes"),
+  );
+});
+
+userSchema.methods.generateEmailVerificationCode = function (): string {
+  const code = Math.floor(100000 + Math.random() * 900000).toString();
+  this.emailVerificationCode = hashWithCrypto(code);
+  return code;
+};
+
 
 const UserModel = mongoose.model<IUser>("User", userSchema);
 
