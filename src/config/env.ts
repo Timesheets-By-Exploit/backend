@@ -7,6 +7,11 @@ const envSchema = z.object({
   NODE_ENV: z
     .enum(["development", "production", "staging", "test"])
     .default("development"),
+  ZEPTO_MAIL_TOKEN: z.string(),
+  ZEPTO_MAIL_URL: z.string(),
+  FROM_EMAIL: z.string().email(),
+  SUPPORT_EMAIL: z.string().email(),
+  FROM_NAME: z.string(),
 });
 
 const isTest = process.env.NODE_ENV === "test";
@@ -19,6 +24,11 @@ const env = isTest
         MONGODB_URI: "mongodb://localhost:27017/test",
         JWT_SECRET: "testsecret",
         NODE_ENV: "test",
+        ZEPTO_MAIL_TOKEN: "",
+        ZEPTO_MAIL_URL: "",
+        SUPPORT_EMAIL: "",
+        FROM_EMAIL: "",
+        FROM_NAME: "",
       },
       error: envSchema.safeParse(process.env).error,
     }
@@ -29,4 +39,14 @@ if (!env.success) {
   process.exit(1);
 }
 
-export const { PORT, MONGODB_URI, JWT_SECRET, NODE_ENV } = env.data;
+export const {
+  PORT,
+  MONGODB_URI,
+  JWT_SECRET,
+  NODE_ENV,
+  ZEPTO_MAIL_TOKEN,
+  ZEPTO_MAIL_URL,
+  FROM_EMAIL,
+  FROM_NAME,
+  SUPPORT_EMAIL,
+} = env.data;
