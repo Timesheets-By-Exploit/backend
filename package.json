@@ -11,6 +11,7 @@
     "lint": "eslint . --ext .ts --fix",
     "lint:check": "eslint . --ext .ts",
     "test": "jest --runInBand --detectOpenHandles",
+    "test:unit": "jest --runInBand --detectOpenHandles --testPathPatterns=__tests__/unit",
     "test:watch": "jest --watch"
   },
   "dependencies": {
