@@ -18,5 +18,6 @@ export default {
     "^@tests/(.*)$": "<rootDir>/src/tests/$1",
     "^@middlewares/(.*)$": "<rootDir>/src/middlewares/$1",
     "^@docs/(.*)$": "<rootDir>/src/docs/$1",
+    "^@services/(.*)$": "<rootDir>/src/services/$1",
   },
 };

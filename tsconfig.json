@@ -26,7 +26,8 @@
       "@modules/*": ["src/modules/*"],
       "@config/*": ["src/config/*"],
       "@middlewares/*": ["src/middlewares/*"],
-      "@docs/*": ["src/docs/*"]
+      "@docs/*": ["src/docs/*"],
+      "@services/*": ["src/services/*"]
     }
   },
   "include": ["src", "tests"]
