@@ -56,6 +56,17 @@ userSchema.methods.generateEmailVerificationCode = function (): string {
   return code;
 };
 
+userSchema.methods.verifyEmailVerificationCode = function (
+  code: string,
+): boolean {
+  const isCorrectCode = hashWithCrypto(code) === this.emailVerificationCode;
+  const isNotExpiredCode =
+    new Date(this.emailVerificationCodeExpiry).getTime() > Date.now();
+  this.emailVerificationCode = null;
+  this.emailVerificationCodeExpiry = null;
+  if (isCorrectCode && isNotExpiredCode) this.isEmailVerified = true;
+  return isCorrectCode && isNotExpiredCode;
+};
 
 const UserModel = mongoose.model<IUser>("User", userSchema);
 

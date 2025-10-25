@@ -11,4 +11,9 @@ export const signupSchema = z.object({
   organizationSize: z.number().int().min(1),
 });
 
-export type SignupInput = z.infer<typeof signupSchema>;
+export const verifyEmailSchema = z.object({
+  emailVerificationCode: z
+    .string()
+    .length(6, "Email verification code must be a 6 digit number"),
+  userId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid ObjectId"),
+});

@@ -1,6 +1,7 @@
 import UserModel from "@modules/user/user.model";
 import {
   EmailVerificationOutput,
+  SendEmailVerificationCodeOutput,
   SignupInput,
   SignupOutput,
 } from "./auth.types";
@@ -53,7 +54,8 @@ const AuthService = {
           userId: createdUser._id.toString(),
           organizationId: organization._id.toString(),
           emailSent: res.success
-            ? (res as ISuccessPayload<EmailVerificationOutput>).data.emailSent
+            ? (res as ISuccessPayload<SendEmailVerificationCodeOutput>).data
+                .emailSent
             : false,
         },
       };
@@ -65,7 +67,9 @@ const AuthService = {
   },
   sendVerificationEmail: async (
     user: IUser,
-  ): Promise<ISuccessPayload<EmailVerificationOutput> | IErrorPayload> => {
+  ): Promise<
+    ISuccessPayload<SendEmailVerificationCodeOutput> | IErrorPayload
+  > => {
     try {
       const code = user.generateEmailVerificationCode();
       await user.save();
@@ -95,6 +99,25 @@ const AuthService = {
     } catch (err: any) {
       return { success: false, error: err.message };
     }
+  },
+  verifyEmailVerificationCode: async (
+    code: string,
+    userId: string,
+  ): Promise<ISuccessPayload<EmailVerificationOutput> | IErrorPayload> => {
+    const user = await UserModel.findOne({
+      _id: userId,
+    });
+    if (!user) return { success: false, error: "User not found" };
+    if (user.isEmailVerified === true)
+      return { success: false, error: "Email already verified" };
+    const isVerified = user.verifyEmailVerificationCode(code);
+    await user.save();
+    if (!isVerified)
+      return {
+        success: false,
+        error: "Invalid or expired email verification code",
+      };
+    return { success: true, data: { userId, isEmailVerified: true } };
   },
 };
 

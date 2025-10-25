@@ -1,4 +1,4 @@
-import { signupSchema } from "./auth.validators";
+import { signupSchema, verifyEmailSchema } from "./auth.validators";
 import { z } from "zod";
 
 export type SignupInput = z.infer<typeof signupSchema>;
@@ -9,4 +9,11 @@ export type SignupOutput = {
   emailSent: boolean;
 };
 
-export type EmailVerificationOutput = { emailSent: boolean };
+export type SendEmailVerificationCodeOutput = { emailSent: boolean };
+
+export type EmailVerificationInput = z.infer<typeof verifyEmailSchema>;
+
+export type EmailVerificationOutput = {
+  userId: string;
+  isEmailVerified: boolean;
+};

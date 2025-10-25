@@ -1,6 +1,11 @@
 import { Request, Response, NextFunction } from "express";
 import AuthService from "./auth.service";
-import { SignupInput, SignupOutput } from "./auth.types";
+import {
+  EmailVerificationOutput,
+  SendEmailVerificationCodeOutput,
+  SignupInput,
+  SignupOutput,
+} from "./auth.types";
 import AppError from "@utils/AppError";
 import { IErrorPayload, ISuccessPayload } from "src/types";
 
@@ -24,6 +29,30 @@ export const signupOrganizationOwner = async (
       message: "Owner signup successful",
       data: (result as ISuccessPayload<SignupOutput>).data,
     });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const verifyEmailVerificationCode = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const result = await AuthService.verifyEmailVerificationCode(
+      req.body.emailVerificationCode,
+      req.body.userId,
+    );
+    if (!result.success)
+      return next(
+        AppError.badRequest(
+          (result as IErrorPayload).error || "Email verification failed",
+        ),
+      );
+    return res
+      .status(200)
+      .json(result as ISuccessPayload<EmailVerificationOutput>);
   } catch (err) {
     next(err);
   }
