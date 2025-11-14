@@ -9,13 +9,10 @@ import {
 import AppError from "@utils/AppError";
 import { IErrorPayload, ISuccessPayload } from "src/types";
 import UserService from "@modules/user/user.service";
+import { routeTryCatcher } from "@middlewares/routeTryCatcher";
 
-export const signupOrganizationOwner = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
-  try {
+export const signupOrganizationOwner = routeTryCatcher(
+  async (req: Request, res: Response, next: NextFunction) => {
     const input: SignupInput = req.body;
 
     const result = await AuthService.signupOwner(input);
@@ -30,17 +27,11 @@ export const signupOrganizationOwner = async (
       message: "Owner signup successful",
       data: (result as ISuccessPayload<SignupOutput>).data,
     });
-  } catch (err) {
-    next(err);
-  }
-};
+  },
+);
 
-export const verifyEmailVerificationCode = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
-  try {
+export const verifyEmailVerificationCode = routeTryCatcher(
+  async (req: Request, res: Response, next: NextFunction) => {
     const result = await AuthService.verifyEmailVerificationCode(
       req.body.emailVerificationCode,
       req.body.email,
@@ -54,17 +45,11 @@ export const verifyEmailVerificationCode = async (
     return res
       .status(200)
       .json(result as ISuccessPayload<EmailVerificationOutput>);
-  } catch (err) {
-    next(err);
-  }
-};
+  },
+);
 
-export const resendEmailVerificationCode = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
-  try {
+export const resendEmailVerificationCode = routeTryCatcher(
+  async (req: Request, res: Response, next: NextFunction) => {
     const user = await UserService.getUserByEmail(req.body.email);
     if (!user) return next(AppError.badRequest("User not found"));
     const result = await AuthService.sendVerificationEmail(user);
@@ -78,7 +63,5 @@ export const resendEmailVerificationCode = async (
     return res
       .status(200)
       .json(result as ISuccessPayload<SendEmailVerificationCodeOutput>);
-  } catch (err) {
-    next(err);
-  }
-};
+  },
+);
