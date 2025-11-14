@@ -45,7 +45,6 @@ const AuthService = {
       await createdUser.save({ session });
       await organization.save({ session });
       await session.commitTransaction();
-      session.endSession();
       const res = await AuthService.sendVerificationEmail(createdUser);
 
       return {
@@ -61,8 +60,9 @@ const AuthService = {
       };
     } catch (err) {
       await session.abortTransaction();
-      session.endSession();
       throw err;
+    } finally {
+      session.endSession();
     }
   },
   sendVerificationEmail: async (
@@ -107,18 +107,25 @@ const AuthService = {
     const user = await UserModel.findOne({
       email: email,
     });
-    if (!user) return { success: false, error: "User not found" };
+    if (!user)
+      return {
+        success: false,
+        error:
+          "If this email exists in our system, a verification email has been sent",
+      };
     if (user.isEmailVerified === true)
-      return { success: false, error: "Email already verified" };
+      return {
+        success: false,
+        error:
+          "If this email exists in our system, a verification email has been sent",
+      };
     const isVerified = user.verifyEmailVerificationCode(code);
-    user.emailVerificationCode = null;
-    user.emailVerificationCodeExpiry = null;
-    await user.save();
     if (!isVerified)
       return {
         success: false,
-        error: "Invalid or expired email verification code",
+        error: "Verification failed. Please check your email and try again",
       };
+    await user.clearEmailVerificationData();
     return { success: true, data: { email, isEmailVerified: true } };
   },
 };

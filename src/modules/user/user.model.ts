@@ -66,6 +66,12 @@ userSchema.methods.verifyEmailVerificationCode = function (
   return isCorrectCode && isNotExpiredCode;
 };
 
+userSchema.methods.clearEmailVerificationData = async function () {
+  this.emailVerificationCode = null;
+  this.emailVerificationCodeExpiry = null;
+  await this.save();
+};
+
 const UserModel = mongoose.model<IUser>("User", userSchema);
 
 export default UserModel;
