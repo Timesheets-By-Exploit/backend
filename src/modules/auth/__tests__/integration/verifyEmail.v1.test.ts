@@ -137,7 +137,7 @@ describe("Email Verification", () => {
       });
 
     expect(resendVerificationCodeResponse.status).toBe(200);
-    expect(getVerificationCode() === getVerificationCode(1)).toBeFalsy;
+    expect(getVerificationCode() === getVerificationCode(1)).toBeFalsy();
   });
   it("cannot resend verification email to non existent user", async () => {
     const user = {
