@@ -9,7 +9,7 @@ import {
 import AppError from "@utils/AppError";
 import { IErrorPayload, ISuccessPayload } from "src/types";
 import UserService from "@modules/user/user.service";
-import { routeTryCatcher } from "@middlewares/routeTryCatcher";
+import { routeTryCatcher } from "@utils/routeTryCatcher";
 
 export const signupOrganizationOwner = routeTryCatcher(
   async (req: Request, res: Response, next: NextFunction) => {
