@@ -62,8 +62,6 @@ userSchema.methods.verifyEmailVerificationCode = function (
   const isCorrectCode = hashWithCrypto(code) === this.emailVerificationCode;
   const isNotExpiredCode =
     new Date(this.emailVerificationCodeExpiry).getTime() > Date.now();
-  this.emailVerificationCode = null;
-  this.emailVerificationCodeExpiry = null;
   if (isCorrectCode && isNotExpiredCode) this.isEmailVerified = true;
   return isCorrectCode && isNotExpiredCode;
 };

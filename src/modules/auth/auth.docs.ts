@@ -26,7 +26,7 @@ export type AuthApiSpec = Tspec.DefineApiSpec<{
         summary: "Verify a user's email with 6 digit code";
         body: EmailVerificationInput;
         responses: {
-          201: ISuccessPayload<EmailVerificationOutput>;
+          200: ISuccessPayload<EmailVerificationOutput>;
           400: IErrorPayload & { details?: string };
         };
       };

@@ -42,7 +42,7 @@ export const verifyEmailVerificationCode = async (
   try {
     const result = await AuthService.verifyEmailVerificationCode(
       req.body.emailVerificationCode,
-      req.body.userId,
+      req.body.userEmail,
     );
     if (!result.success)
       return next(

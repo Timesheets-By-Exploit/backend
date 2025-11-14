@@ -14,6 +14,6 @@ export type SendEmailVerificationCodeOutput = { emailSent: boolean };
 export type EmailVerificationInput = z.infer<typeof verifyEmailSchema>;
 
 export type EmailVerificationOutput = {
-  userId: string;
+  userEmail: string;
   isEmailVerified: boolean;
 };
