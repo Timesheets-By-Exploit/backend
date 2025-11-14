@@ -102,10 +102,10 @@ const AuthService = {
   },
   verifyEmailVerificationCode: async (
     code: string,
-    userEmail: string,
+    email: string,
   ): Promise<ISuccessPayload<EmailVerificationOutput> | IErrorPayload> => {
     const user = await UserModel.findOne({
-      email: userEmail,
+      email: email,
     });
     if (!user) return { success: false, error: "User not found" };
     if (user.isEmailVerified === true)
@@ -119,7 +119,7 @@ const AuthService = {
         success: false,
         error: "Invalid or expired email verification code",
       };
-    return { success: true, data: { userEmail, isEmailVerified: true } };
+    return { success: true, data: { email, isEmailVerified: true } };
   },
 };
 
