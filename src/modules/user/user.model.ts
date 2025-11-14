@@ -1,4 +1,3 @@
-// src/modules/auth/auth.model.ts
 import mongoose, { CallbackError, Schema } from "mongoose";
 import { IUser } from "./user.types";
 import { hashWithBcrypt, hashWithCrypto } from "@utils/encryptors";
