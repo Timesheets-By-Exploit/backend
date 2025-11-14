@@ -31,4 +31,12 @@ describe("Email Verification Code Logic", () => {
     expect(user.isEmailVerified).toBe(false);
     expect(isCorrectCode).toBe(false);
   });
+
+  it("Clears verification data after code is verified", async () => {
+    const user = new UserModel(UserFactory.generate());
+    const code = user.generateEmailVerificationCode();
+    expect(code).toHaveLength(6);
+    expect(code).not.toBe(user.emailVerificationCode);
+    expect(user.emailVerificationCodeExpiry).toBeDefined();
+  });
 });
