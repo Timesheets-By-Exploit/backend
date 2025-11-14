@@ -16,8 +16,8 @@ beforeEach(() => {
   });
 });
 
-function getVerificationCode() {
-  const call = (sendEmailWithTemplate as jest.Mock).mock.calls[0][0];
+function getVerificationCode(index = 0) {
+  const call = (sendEmailWithTemplate as jest.Mock).mock.calls[index][0];
   return call.merge_info.emailVerificationCode;
 }
 
@@ -34,7 +34,7 @@ describe("Email Verification", () => {
 
     const verifyEmailRes = await request(app)
       .post("/api/v1/auth/verify-email")
-      .send({ userEmail: user.email, emailVerificationCode: "RANDOM" });
+      .send({ email: user.email, emailVerificationCode: "RANDOM" });
 
     expect(verifyEmailRes.status).toBe(400);
     expect(verifyEmailRes.body.success).toBe(false);
@@ -61,7 +61,7 @@ describe("Email Verification", () => {
     const verifyEmailRes = await request(app)
       .post("/api/v1/auth/verify-email")
       .send({
-        userEmail: user.email,
+        email: user.email,
         emailVerificationCode: getVerificationCode(),
       });
 
@@ -82,7 +82,7 @@ describe("Email Verification", () => {
     const verifyEmailRes = await request(app)
       .post("/api/v1/auth/verify-email")
       .send({
-        userEmail: user.email,
+        email: user.email,
         emailVerificationCode: getVerificationCode(),
       });
 
@@ -103,7 +103,7 @@ describe("Email Verification", () => {
     const firstVerificationResponse = await request(app)
       .post("/api/v1/auth/verify-email")
       .send({
-        userEmail: user.email,
+        email: user.email,
         emailVerificationCode: getVerificationCode(),
       });
 
@@ -113,11 +113,43 @@ describe("Email Verification", () => {
     const secondVerificationResponse = await request(app)
       .post("/api/v1/auth/verify-email")
       .send({
-        userEmail: user.email,
+        email: user.email,
         emailVerificationCode: getVerificationCode(),
       });
 
     expect(secondVerificationResponse.status).toBe(400);
     expect(secondVerificationResponse.body.success).toBe(false);
+  });
+  it("resends verification code and previous code is different from new code", async () => {
+    const orgData = OrganizationFactory.generate();
+    const user = {
+      ...UserFactory.generate(),
+      organizationName: orgData.name,
+      organizationSize: orgData.size,
+    };
+
+    await request(app).post("/api/v1/auth/signup").send(user);
+
+    const resendVerificationCodeResponse = await request(app)
+      .post("/api/v1/auth/resend-verification-email")
+      .send({
+        email: user.email,
+      });
+
+    expect(resendVerificationCodeResponse.status).toBe(200);
+    expect(getVerificationCode() === getVerificationCode(1)).toBeFalsy;
+  });
+  it("cannot resend verification email to non existent user", async () => {
+    const user = {
+      ...UserFactory.generate(),
+    };
+
+    const resendVerificationCodeResponse = await request(app)
+      .post("/api/v1/auth/resend-verification-email")
+      .send({
+        email: user.email,
+      });
+
+    expect(resendVerificationCodeResponse.status).toBe(400);
   });
 });
