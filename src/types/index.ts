@@ -1,5 +1,10 @@
-
-export type UNIT_OF_TIME = "minutes" | "min" | "hours" | "hr" | "seconds" | "sec";
+export type UNIT_OF_TIME =
+  | "minutes"
+  | "min"
+  | "hours"
+  | "hr"
+  | "seconds"
+  | "sec";
 
 export interface IErrorPayload {
   success: boolean;

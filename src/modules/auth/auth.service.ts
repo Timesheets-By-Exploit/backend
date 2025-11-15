@@ -73,7 +73,7 @@ const AuthService = {
     try {
       const code = user.generateEmailVerificationCode();
       await user.save();
-      let emailSentResponse = await sendEmailWithTemplate({
+      const emailSentResponse = await sendEmailWithTemplate({
         to: [
           {
             email_address: {
@@ -96,8 +96,8 @@ const AuthService = {
         success: emailSentResponse.success,
         data: { emailSent: emailSentResponse.emailSent || false },
       };
-    } catch (err: any) {
-      return { success: false, error: err.message };
+    } catch (err) {
+      return { success: false, error: (err as Error).message };
     }
   },
   verifyEmailVerificationCode: async (

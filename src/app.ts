@@ -19,14 +19,10 @@ const app: Application = express();
   app.get("/api/health", (req, res) => {
     res.send({ status: "ok" });
   });
-  app.use(
-    "/api/v1/docs",
-    swaggerUi.serve,
-    swaggerUi.setup(await getTSpec()),
-  );
+  app.use("/api/v1/docs", swaggerUi.serve, swaggerUi.setup(await getTSpec()));
   app.use("*", notFound);
-  app.use((err: Error, req: Request, res: Response, _next: NextFunction) =>
-    errorHandler(err, req, res),
+  app.use((err: Error, req: Request, res: Response, next: NextFunction) =>
+    errorHandler(err, req, res, next),
   );
 })();
 

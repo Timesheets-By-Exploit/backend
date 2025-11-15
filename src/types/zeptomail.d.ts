@@ -47,7 +47,9 @@ declare module "zeptomail" {
 
   export class SendMailClient {
     constructor(options?: { url: string; token?: string } | string);
-    sendMailWithTemplate(payload: SendMailPayload): Promise<any>;
+    sendMailWithTemplate(
+      payload: SendMailPayload,
+    ): Promise<{ message: string }>;
   }
 
   export { SendMailClient };

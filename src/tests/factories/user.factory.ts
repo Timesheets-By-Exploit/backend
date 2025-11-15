@@ -1,7 +1,9 @@
 import { faker } from "@faker-js/faker";
 
 export const UserFactory = {
-  generate: (overrides: Partial<{}> = {}) => ({
+  generate: (
+    overrides: Partial<{ [x: string]: string | number | undefined }> = {},
+  ) => ({
     firstName: faker.person.firstName(),
     lastName: faker.person.lastName(),
     email: faker.internet.email(),

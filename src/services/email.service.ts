@@ -7,7 +7,7 @@ import {
   SUPPORT_EMAIL,
 } from "@config/env";
 
-let client = new SendMailClient({
+const client = new SendMailClient({
   url: ZEPTO_MAIL_URL,
   token: ZEPTO_MAIL_TOKEN,
 });
@@ -28,7 +28,7 @@ export async function sendEmailWithTemplate(
       },
     });
     return { success: res.message === "OK", emailSent: res.message === "OK" };
-  } catch (err: any) {
-    return { success: false, error: err.error.message };
+  } catch (err) {
+    return { success: false, error: (err as { error: Error }).error.message };
   }
 }

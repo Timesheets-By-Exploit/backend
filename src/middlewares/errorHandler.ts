@@ -1,25 +1,31 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import AppError from "../utils/AppError";
 import { NODE_ENV } from "@config/env";
 
-const errorHandler = (err: any, _req: Request, res: Response) => {
-  let statusCode = err.statusCode || 500;
-  let message = err.message || "Internal Server Error";
-  let details = err.details;
-
+const errorHandler = (
+  err: unknown,
+  _req: Request,
+  res: Response,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  next?: NextFunction,
+) => {
   if (err instanceof AppError) {
-    return res.status(statusCode).json({
+    return res.status(err.statusCode).json({
       success: false,
-      error: message,
-      details,
+      error: err.message,
+      details: err.details,
     });
   }
+  if (err instanceof Error)
+    return res.status(500).json({
+      success: false,
+      error: err.message || "Something went wrong",
+      stack: NODE_ENV === "development" ? err.stack : "",
+    });
 
   return res.status(500).json({
     success: false,
-    error: message || "Something went wrong",
-    details,
-    stack: NODE_ENV === "development" ? err.stack : details,
+    error: "Something went wrong",
   });
 };
 

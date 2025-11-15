@@ -9,4 +9,3 @@ export const TIME_UNITS = {
   secs: 1000,
   sec: 1000,
 };
-
