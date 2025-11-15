@@ -1,0 +1,92 @@
+import request from "supertest";
+import app from "@app";
+import { userFixtures } from "@tests/fixtures/user";
+import { UserFactory } from "@tests/factories/user.factory";
+import { OrganizationFactory } from "@tests/factories/organization.factory";
+
+describe("Auth Signup", () => {
+  it("should return 400 if organization name is missing", async () => {
+    const res = await request(app)
+      .post("/api/v1/auth/signup")
+      .send({
+        ...UserFactory.generate(),
+      });
+
+    expect(res.status).toBe(400);
+  });
+  it("should return 400 if email is missing", async () => {
+    const res = await request(app)
+      .post("/api/v1/auth/signup")
+      .send({
+        ...userFixtures.noEmail,
+        ...OrganizationFactory.generate(),
+      });
+
+    expect(res.status).toBe(400);
+  });
+  it("should return 400 if password is missing", async () => {
+    const res = await request(app)
+      .post("/api/v1/auth/signup")
+      .send({
+        ...userFixtures.noPassword,
+        ...OrganizationFactory.generate(),
+      });
+
+    expect(res.status).toBe(400);
+  });
+  it("should return 400 if last name is missing", async () => {
+    const res = await request(app)
+      .post("/api/v1/auth/signup")
+      .send({
+        ...userFixtures.noFirstName,
+        ...OrganizationFactory.generate(),
+      });
+
+    expect(res.status).toBe(400);
+  });
+  it("should return 400 if last name is missing", async () => {
+    const res = await request(app)
+      .post("/api/v1/auth/signup")
+      .send({
+        ...userFixtures.noLastName,
+        ...OrganizationFactory.generate(),
+      });
+
+    expect(res.status).toBe(400);
+  });
+  it("should return 400 if email is invalid", async () => {
+    const res = await request(app)
+      .post("/api/v1/auth/signup")
+      .send({
+        ...userFixtures.invalidEmail,
+        ...OrganizationFactory.generate(),
+      });
+
+    expect(res.status).toBe(400);
+  });
+  it("should return 400 if organization size is missing", async () => {
+    const res = await request(app)
+      .post("/api/v1/auth/signup")
+      .send({
+        ...userFixtures.invalidEmail,
+        ...OrganizationFactory.generate({ size: undefined }),
+      });
+
+    expect(res.status).toBe(400);
+  });
+  it("should return 201 when a user signs up successfully", async () => {
+    const orgData = OrganizationFactory.generate();
+    const res = await request(app)
+      .post("/api/v1/auth/signup")
+      .send({
+        ...UserFactory.generate(),
+        organizationName: orgData.name,
+        organizationSize: orgData.size,
+      });
+
+    expect(res.status).toBe(201);
+    expect(res.body).toHaveProperty("data");
+    expect(res.body.data).toHaveProperty("userId");
+    expect(res.body.data).toHaveProperty("organizationId");
+  });
+});
