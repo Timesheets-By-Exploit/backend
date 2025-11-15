@@ -1,4 +1,4 @@
-import { AnyZodObject } from "zod";
+import { AnyZodObject, ZodError, ZodIssue } from "zod";
 import { Request, Response, NextFunction } from "express";
 import AppError from "@utils/AppError";
 
@@ -8,15 +8,15 @@ const validateResource =
     try {
       schema.parse(req.body);
       next();
-    } catch (e: any) {
+    } catch (e: unknown) {
       return next(
         AppError.badRequest(
           "Validation failed",
-          (e.errors as Array<{ path: string; message: string }>).reduce(
-            (acc: string, err: any, idx: number) =>
+          (e as ZodError).errors.reduce(
+            (acc: string, err: ZodIssue, idx: number) =>
               acc +
               `Error on path ${err.path}: ${err.message}${
-                idx !== e.errors.length - 1 ? ", " : ""
+                idx !== (e as ZodError).errors.length - 1 ? ", " : ""
               }`,
             "",
           ),

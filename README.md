@@ -6,6 +6,7 @@ Built with **Express + TypeScript + MongoDB**, following best practices.
 ---
 
 ## Features (MVP)
+
 - User authentication (JWT-based)
 - CRUD for Timesheets
 - CRUD for Projects
@@ -15,6 +16,7 @@ Built with **Express + TypeScript + MongoDB**, following best practices.
 ---
 
 ## Tech Stack
+
 - **Express** (TypeScript)
 - **MongoDB (Mongoose)**
 - **Jest + Supertest** (Testing)
@@ -24,12 +26,14 @@ Built with **Express + TypeScript + MongoDB**, following best practices.
 ---
 
 ## 📦 Installation
+
 ```bash
 git clone https://github.com/Timesheets-By-Exploit/backend.git
-cd backend 
+cd backend
 npm install
 npm run dev
 ```
+
 ---
 
 ## Git Workflow
@@ -115,12 +119,12 @@ git push
 
 Follow **Conventional Commits**:
 
-* `feat:` → new feature
-* `fix:` → bug fix
-* `test:` → testing work
-* `docs:` → documentation updates
-* `refactor:` → code refactoring
-* `chore:` → maintenance (configs, deps)
+- `feat:` → new feature
+- `fix:` → bug fix
+- `test:` → testing work
+- `docs:` → documentation updates
+- `refactor:` → code refactoring
+- `chore:` → maintenance (configs, deps)
 
 Examples:
 
@@ -167,8 +171,8 @@ git branch -d feature/auth-signup
 git push origin --delete feature/auth-signup
 ```
 
-
 ### Folder Structure
+
 ```
 timesheets-backend/
 │
@@ -191,7 +195,7 @@ timesheets-backend/
 │   │   ├── module.model.ts
 │   │   ├── module.routes.ts
 │   │   └── module.types.ts
-│   │   
+│   │
 │   │
 │   ├── middlewares/        # Custom Express middlewares
 │   │   ├── errorHandler.ts

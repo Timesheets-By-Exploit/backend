@@ -1,5 +1,5 @@
-import js from "@eslint/js"
-import tseslint from "typescript-eslint"
+import js from "@eslint/js";
+import tseslint from "typescript-eslint";
 
 export default [
   js.configs.recommended,
@@ -12,7 +12,10 @@ export default [
       },
     },
     rules: {
-      "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/no-explicit-any": "error",
     },
   },
-]
+  {
+    ignores: ["dist/**", "node_modules/**", "src/modules/auth/__tests__/**"],
+  },
+];

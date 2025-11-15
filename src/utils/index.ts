@@ -12,7 +12,7 @@ export function formatZodErrors(
   errors: Array<{ path: string; message: string }>,
 ) {
   return errors.reduce(
-    (acc: string, err: any, idx: number) =>
+    (acc: string, err, idx: number) =>
       acc +
       `Error on path ${err.path}: ${err.message}${
         idx !== errors.length - 1 ? ", " : ""

@@ -36,7 +36,6 @@ const organizationSchema = new mongoose.Schema<IOrganization>(
   { timestamps: true },
 );
 
-
 organizationSchema.pre("validate", async function (next) {
   if (!this.isModified("name")) return next();
 
@@ -52,7 +51,6 @@ organizationSchema.pre("validate", async function (next) {
   this.slug = slug;
   next();
 });
-
 
 const OrganizationModel = mongoose.model<IOrganization>(
   "Organization",
