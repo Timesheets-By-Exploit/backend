@@ -1,8 +1,14 @@
 import request from "supertest";
 import app from "@app";
+import mongoose from "mongoose";
 import { userFixtures } from "@tests/fixtures/user";
 import { UserFactory } from "@tests/factories/user.factory";
 import { OrganizationFactory } from "@tests/factories/organization.factory";
+import { clearDB } from "@tests/utils";
+
+beforeEach(async () => {
+  await clearDB();
+});
 
 describe("Auth Signup", () => {
   it("should return 400 if organization name is missing", async () => {
@@ -34,7 +40,7 @@ describe("Auth Signup", () => {
 
     expect(res.status).toBe(400);
   });
-  it("should return 400 if last name is missing", async () => {
+  it("should return 400 if first name is missing", async () => {
     const res = await request(app)
       .post("/api/v1/auth/signup")
       .send({

@@ -1,6 +1,7 @@
 import { Router } from "express";
 import validateResource from "@middlewares/validators";
 import {
+  loginSchema,
   resendEmailVerificationCodeSchema,
   signupSchema,
   verifyEmailSchema,
@@ -9,6 +10,7 @@ import {
   signupOrganizationOwner,
   verifyEmailVerificationCode,
   resendEmailVerificationCode,
+  loginUser,
 } from "../auth.controller";
 
 const authRouter = Router();
@@ -28,5 +30,6 @@ authRouter.post(
   validateResource(resendEmailVerificationCodeSchema),
   resendEmailVerificationCode,
 );
+authRouter.post("/login", validateResource(loginSchema), loginUser);
 
 export default authRouter;

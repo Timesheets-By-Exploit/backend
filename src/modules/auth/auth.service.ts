@@ -10,6 +10,11 @@ import mongoose from "mongoose";
 import { IUser } from "@modules/user/user.types";
 import { sendEmailWithTemplate } from "@services/email.service";
 import { ISuccessPayload, IErrorPayload } from "src/types";
+import { hashWithCrypto } from "@utils/encryptors";
+import { RefreshTokenModel } from "./refreshToken.model";
+import { DEFAULT_REFRESH_DAYS } from "@config/constants";
+import { generateRandomTokenWithCrypto } from "@utils/generators";
+import { generateAccessToken } from "./auth.utils";
 
 const AuthService = {
   signupOwner: async (
@@ -127,6 +132,47 @@ const AuthService = {
       };
     await user.clearEmailVerificationData();
     return { success: true, data: { email, isEmailVerified: true } };
+  },
+  createTokensForUser: async (
+    user: IUser,
+    rememberMe = false,
+    metaData?: {
+      ip?: string | undefined;
+      userAgent?: string | undefined;
+    },
+  ) => {
+    const accessToken = generateAccessToken({
+      id: user._id.toString(),
+      email: user.email,
+    });
+
+    const rawRefreshToken = generateRandomTokenWithCrypto(
+      Number(process.env.REFRESH_TOKEN_BYTES || 64),
+    );
+    const tokenHash = hashWithCrypto(rawRefreshToken);
+
+    const expiresAt = new Date(
+      Date.now() +
+        (rememberMe ? DEFAULT_REFRESH_DAYS : 7) * 24 * 60 * 60 * 1000,
+    );
+
+    const refreshDoc = await RefreshTokenModel.create({
+      user: user._id,
+      tokenHash,
+      expiresAt,
+      createdByIp: metaData?.ip,
+      userAgent: metaData?.userAgent,
+    });
+
+    return {
+      success: true,
+      data: {
+        accessToken,
+        refreshToken: rawRefreshToken,
+        refreshTokenId: refreshDoc._id,
+        expiresAt,
+      },
+    };
   },
 };
 

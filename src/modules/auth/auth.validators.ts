@@ -21,3 +21,8 @@ export const verifyEmailSchema = z.object({
 export const resendEmailVerificationCodeSchema = z.object({
   email: z.string().email(),
 });
+
+export const loginSchema = z.object({
+  email: z.string().email("Invalid email format"),
+  password: z.string(),
+});
