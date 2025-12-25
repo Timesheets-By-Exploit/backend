@@ -2,6 +2,8 @@ import { Tspec } from "tspec";
 import {
   EmailVerificationInput,
   EmailVerificationOutput,
+  loginInput,
+  LoginOutput,
   resendEmailVerificationCodeInput,
   SignupInput,
 } from "./auth.types";
@@ -39,6 +41,17 @@ export type AuthApiSpec = Tspec.DefineApiSpec<{
         responses: {
           200: ISuccessPayload<EmailVerificationOutput>;
           400: IErrorPayload & { details?: string };
+        };
+      };
+    };
+    "/login": {
+      post: {
+        summary: "Login User";
+        body: loginInput;
+        responses: {
+          200: ISuccessPayload<LoginOutput>;
+          400: IErrorPayload & { details?: string };
+          403: IErrorPayload & { details?: string };
         };
       };
     };

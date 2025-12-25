@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import AuthService from "./auth.service";
 import {
   EmailVerificationOutput,
+  LoginOutput,
   SendEmailVerificationCodeOutput,
   SignupInput,
   SignupOutput,
@@ -110,7 +111,9 @@ export const loginUser = routeTryCatcher(
     });
     return res.json({
       success: true,
-      user: serializeUser(user),
-    });
+      data: {
+        user: serializeUser(user),
+      },
+    } as ISuccessPayload<LoginOutput>);
   },
 );

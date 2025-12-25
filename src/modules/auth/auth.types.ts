@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import {
+  loginSchema,
   resendEmailVerificationCodeSchema,
   signupSchema,
   verifyEmailSchema,
@@ -39,6 +40,19 @@ export type EmailVerificationOutput = {
 export type resendEmailVerificationCodeInput = z.infer<
   typeof resendEmailVerificationCodeSchema
 >;
+
+export type LoginOutput = {
+  user: {
+    email: string;
+    isEmailVerified: boolean;
+    id: string;
+    name: string;
+    role: string;
+    createdAt: string;
+    updatedAt: string;
+  };
+};
+export type loginInput = z.infer<typeof loginSchema>;
 
 export interface AccessPayload {
   id: string;

@@ -30,18 +30,19 @@ const AuthService = {
     } = input;
     const existingUser = await UserModel.exists({ email });
     if (existingUser) return { success: false, error: "User already exists" };
-
+    let createdUser;
+    let organization;
     const session = await mongoose.startSession();
     session.startTransaction();
     try {
-      const createdUser = new UserModel({
+      createdUser = new UserModel({
         firstName,
         lastName,
         email,
         password,
         role: "owner",
       });
-      const organization = new OrganizationModel({
+      organization = new OrganizationModel({
         name: organizationName,
         owner: createdUser._id,
         size: organizationSize,
@@ -50,25 +51,27 @@ const AuthService = {
       await createdUser.save({ session });
       await organization.save({ session });
       await session.commitTransaction();
-      const res = await AuthService.sendVerificationEmail(createdUser);
-
-      return {
-        success: true,
-        data: {
-          userId: createdUser._id.toString(),
-          organizationId: organization._id.toString(),
-          emailSent: res.success
-            ? (res as ISuccessPayload<SendEmailVerificationCodeOutput>).data
-                .emailSent
-            : false,
-        },
-      };
     } catch (err) {
-      await session.abortTransaction();
+      if (session.inTransaction()) {
+        await session.abortTransaction();
+      }
       throw err;
     } finally {
       session.endSession();
     }
+    const res = await AuthService.sendVerificationEmail(createdUser);
+
+    return {
+      success: true,
+      data: {
+        userId: createdUser._id.toString(),
+        organizationId: organization._id.toString(),
+        emailSent: res.success
+          ? (res as ISuccessPayload<SendEmailVerificationCodeOutput>).data
+              .emailSent
+          : false,
+      },
+    };
   },
   sendVerificationEmail: async (
     user: IUser,

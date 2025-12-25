@@ -75,6 +75,6 @@ describe("Auth Login", () => {
     expect(refresh).toContain("Path=/auth/refresh");
 
     expect(res.body.success).toBe(true);
-    expect(res.body.user).toBeDefined();
+    expect(res.body.data.user).toBeDefined();
   });
 });

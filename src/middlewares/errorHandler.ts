@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import AppError from "../utils/AppError";
 import { NODE_ENV } from "@config/env";
+import { MongooseError } from "mongoose";
 
 const errorHandler = (
   err: unknown,
@@ -16,13 +17,14 @@ const errorHandler = (
       details: err.details,
     });
   }
-  if (err instanceof Error)
+
+  if (err instanceof Error || err instanceof MongooseError) {
     return res.status(500).json({
       success: false,
       error: err.message || "Something went wrong",
       stack: NODE_ENV === "development" ? err.stack : "",
     });
-
+  }
   return res.status(500).json({
     success: false,
     error: "Something went wrong",
