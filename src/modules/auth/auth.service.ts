@@ -25,6 +25,7 @@ const AuthService = {
       lastName,
       email,
       password,
+      createOrg = false,
       organizationName,
       organizationSize,
     } = input;
@@ -42,14 +43,21 @@ const AuthService = {
         password,
         role: "owner",
       });
-      organization = new OrganizationModel({
-        name: organizationName,
-        owner: createdUser._id,
-        size: organizationSize,
-      });
-      createdUser.organization = organization._id;
+
+      if (createOrg) {
+        if (!organizationName || organizationSize === undefined) {
+          throw new Error("Organization name and size are required");
+        }
+        organization = new OrganizationModel({
+          name: organizationName,
+          owner: createdUser._id,
+          size: organizationSize,
+        });
+        createdUser.organization = organization._id;
+        await organization.save({ session });
+      }
+
       await createdUser.save({ session });
-      await organization.save({ session });
       await session.commitTransaction();
     } catch (err) {
       if (session.inTransaction()) {
@@ -65,7 +73,7 @@ const AuthService = {
       success: true,
       data: {
         userId: createdUser._id.toString(),
-        organizationId: organization._id.toString(),
+        ...(organization && { organizationId: organization._id.toString() }),
         emailSent: res.success
           ? (res as ISuccessPayload<SendEmailVerificationCodeOutput>).data
               .emailSent

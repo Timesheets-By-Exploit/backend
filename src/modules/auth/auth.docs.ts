@@ -2,6 +2,7 @@ import { Tspec } from "tspec";
 import {
   EmailVerificationInput,
   EmailVerificationOutput,
+  GetMeOutput,
   loginInput,
   LoginOutput,
   resendEmailVerificationCodeInput,
@@ -20,7 +21,7 @@ export type AuthApiSpec = Tspec.DefineApiSpec<{
         body: SignupInput;
         responses: {
           201: ISuccessPayload<SignupOutput>;
-          400: IErrorPayload & { details?: string };
+          400: IErrorPayload;
         };
       };
     };
@@ -30,7 +31,7 @@ export type AuthApiSpec = Tspec.DefineApiSpec<{
         body: EmailVerificationInput;
         responses: {
           200: ISuccessPayload<EmailVerificationOutput>;
-          400: IErrorPayload & { details?: string };
+          400: IErrorPayload;
         };
       };
     };
@@ -40,7 +41,7 @@ export type AuthApiSpec = Tspec.DefineApiSpec<{
         body: resendEmailVerificationCodeInput;
         responses: {
           200: ISuccessPayload<EmailVerificationOutput>;
-          400: IErrorPayload & { details?: string };
+          400: IErrorPayload;
         };
       };
     };
@@ -50,8 +51,8 @@ export type AuthApiSpec = Tspec.DefineApiSpec<{
         body: loginInput;
         responses: {
           200: ISuccessPayload<LoginOutput>;
-          400: IErrorPayload & { details?: string };
-          403: IErrorPayload & { details?: string };
+          400: IErrorPayload;
+          403: IErrorPayload;
         };
       };
     };
@@ -61,7 +62,16 @@ export type AuthApiSpec = Tspec.DefineApiSpec<{
         body: Record<string, string>;
         responses: {
           200: ISuccessPayload<Record<string, string>>;
-          401: IErrorPayload & { details?: string };
+          401: IErrorPayload;
+        };
+      };
+    };
+    "/me": {
+      get: {
+        summary: "Get current authenticated user";
+        responses: {
+          200: ISuccessPayload<GetMeOutput>;
+          401: IErrorPayload;
         };
       };
     };

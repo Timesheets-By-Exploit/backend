@@ -13,4 +13,5 @@ export interface IErrorPayload {
 export interface ISuccessPayload<T> {
   success: boolean;
   data: T;
+  details?: string;
 }

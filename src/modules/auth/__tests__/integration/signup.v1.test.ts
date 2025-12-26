@@ -11,11 +11,13 @@ beforeEach(async () => {
 });
 
 describe("Auth Signup", () => {
-  it("should return 400 if organization name is missing", async () => {
+  it("should return 400 if organization name is missing when createOrg is true", async () => {
     const res = await request(app)
       .post("/api/v1/auth/signup")
       .send({
         ...UserFactory.generate(),
+        createOrg: true,
+        organizationSize: 10,
       });
 
     expect(res.status).toBe(400);
@@ -70,22 +72,25 @@ describe("Auth Signup", () => {
 
     expect(res.status).toBe(400);
   });
-  it("should return 400 if organization size is missing", async () => {
-    const res = await request(app)
-      .post("/api/v1/auth/signup")
-      .send({
-        ...userFixtures.invalidEmail,
-        ...OrganizationFactory.generate({ size: undefined }),
-      });
-
-    expect(res.status).toBe(400);
-  });
-  it("should return 201 when a user signs up successfully", async () => {
+  it("should return 400 if organization size is missing when createOrg is true", async () => {
     const orgData = OrganizationFactory.generate();
     const res = await request(app)
       .post("/api/v1/auth/signup")
       .send({
         ...UserFactory.generate(),
+        createOrg: true,
+        organizationName: orgData.name,
+      });
+
+    expect(res.status).toBe(400);
+  });
+  it("should return 201 when a user signs up successfully with organization", async () => {
+    const orgData = OrganizationFactory.generate();
+    const res = await request(app)
+      .post("/api/v1/auth/signup")
+      .send({
+        ...UserFactory.generate(),
+        createOrg: true,
         organizationName: orgData.name,
         organizationSize: orgData.size,
       });
@@ -94,5 +99,32 @@ describe("Auth Signup", () => {
     expect(res.body).toHaveProperty("data");
     expect(res.body.data).toHaveProperty("userId");
     expect(res.body.data).toHaveProperty("organizationId");
+  });
+
+  it("should return 201 when a user signs up successfully without organization", async () => {
+    const res = await request(app)
+      .post("/api/v1/auth/signup")
+      .send({
+        ...UserFactory.generate(),
+      });
+
+    expect(res.status).toBe(201);
+    expect(res.body).toHaveProperty("data");
+    expect(res.body.data).toHaveProperty("userId");
+    expect(res.body.data).not.toHaveProperty("organizationId");
+  });
+
+  it("should return 201 when a user signs up with createOrg false", async () => {
+    const res = await request(app)
+      .post("/api/v1/auth/signup")
+      .send({
+        ...UserFactory.generate(),
+        createOrg: false,
+      });
+
+    expect(res.status).toBe(201);
+    expect(res.body).toHaveProperty("data");
+    expect(res.body.data).toHaveProperty("userId");
+    expect(res.body.data).not.toHaveProperty("organizationId");
   });
 });

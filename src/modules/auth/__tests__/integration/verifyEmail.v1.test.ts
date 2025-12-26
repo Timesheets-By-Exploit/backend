@@ -30,6 +30,7 @@ describe("Email Verification", () => {
     const orgData = OrganizationFactory.generate();
     const user = {
       ...UserFactory.generate(),
+      createOrg: true,
       organizationName: orgData.name,
       organizationSize: orgData.size,
     };
@@ -50,6 +51,7 @@ describe("Email Verification", () => {
     const orgData = OrganizationFactory.generate();
     const user = {
       ...UserFactory.generate(),
+      createOrg: true,
       organizationName: orgData.name,
       organizationSize: orgData.size,
     };
@@ -79,6 +81,7 @@ describe("Email Verification", () => {
     const orgData = OrganizationFactory.generate();
     const user = {
       ...UserFactory.generate(),
+      createOrg: true,
       organizationName: orgData.name,
       organizationSize: orgData.size,
     };
@@ -100,6 +103,7 @@ describe("Email Verification", () => {
     const orgData = OrganizationFactory.generate();
     const user = {
       ...UserFactory.generate(),
+      createOrg: true,
       organizationName: orgData.name,
       organizationSize: orgData.size,
     };
@@ -130,6 +134,7 @@ describe("Email Verification", () => {
     const orgData = OrganizationFactory.generate();
     const user = {
       ...UserFactory.generate(),
+      createOrg: true,
       organizationName: orgData.name,
       organizationSize: orgData.size,
     };

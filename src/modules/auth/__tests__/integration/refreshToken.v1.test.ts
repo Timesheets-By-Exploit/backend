@@ -156,7 +156,6 @@ describe("Refresh Token", () => {
 
     if (!refreshToken) throw new Error("Invalid refresh_token signature");
     const oldTokenHash = hashWithCrypto(refreshToken);
-    console.log(oldTokenHash, "oldTokenHash", "refreshToken");
     const oldTokenDoc = await RefreshTokenModel.findOne({
       tokenHash: oldTokenHash,
     });

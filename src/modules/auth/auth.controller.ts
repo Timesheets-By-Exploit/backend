@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import AuthService from "./auth.service";
 import {
   EmailVerificationOutput,
+  GetMeOutput,
   LoginOutput,
   SendEmailVerificationCodeOutput,
   SignupInput,
@@ -28,7 +29,7 @@ export const signupOrganizationOwner = routeTryCatcher(
 
     return res.status(201).json({
       success: true,
-      message: "Owner signup successful",
+      message: "Signup successful",
       data: (result as ISuccessPayload<SignupOutput>).data,
     });
   },
@@ -126,5 +127,22 @@ export const refreshToken = routeTryCatcher(
     });
 
     return res.json({ success: true });
+  },
+);
+
+export const getCurrentUser = routeTryCatcher(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user;
+
+    if (!user) {
+      return next(AppError.unauthorized("User not found"));
+    }
+
+    return res.json({
+      success: true,
+      data: {
+        user: serializeUser(user),
+      },
+    } as ISuccessPayload<GetMeOutput>);
   },
 );

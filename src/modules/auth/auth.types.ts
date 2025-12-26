@@ -23,7 +23,7 @@ export interface IRefreshTokenDoc extends Document {
 export type SignupInput = z.infer<typeof signupSchema>;
 
 export type SignupOutput = {
-  organizationId: string;
+  organizationId?: string;
   userId: string;
   emailSent: boolean;
 };
@@ -58,3 +58,15 @@ export interface AccessPayload {
   id: string;
   email: string;
 }
+
+export type GetMeOutput = {
+  user: {
+    id: string;
+    email: string;
+    name: string;
+    role: string;
+    isEmailVerified: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+  };
+};
