@@ -108,7 +108,7 @@ export const loginUser = routeTryCatcher(
 
 export const refreshToken = routeTryCatcher(
   async (req: Request, res: Response, next: NextFunction) => {
-    const token = req.cookies?.refresh_token;
+    const token = req.signedCookies?.refresh_token;
     if (!token) return next(AppError.unauthorized("Unauthenticated"));
 
     const result = await AuthService.rotateRefreshToken(token, req.ip);

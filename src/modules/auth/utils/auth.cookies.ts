@@ -21,6 +21,7 @@ export function setAuthCookies({
     sameSite,
     maxAge: convertTimeToMilliseconds(15, "min"),
     path: "/",
+    signed: true,
   });
 
   res.cookie("refresh_token", refreshToken, {
@@ -29,6 +30,7 @@ export function setAuthCookies({
     sameSite,
     maxAge: Math.max(0, refreshTokenExpiresAt.getTime() - Date.now()),
     path: "/auth/refresh",
+    signed: true,
   });
 }
 
@@ -41,6 +43,7 @@ export function clearAuthCookies(res: Response) {
     secure,
     sameSite,
     path: "/",
+    signed: true,
   });
 
   res.clearCookie("refresh_token", {
@@ -48,5 +51,6 @@ export function clearAuthCookies(res: Response) {
     secure,
     sameSite,
     path: "/auth/refresh",
+    signed: true,
   });
 }
