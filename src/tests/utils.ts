@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
 
 export const clearDB = async () => {
-  const collections = await mongoose.connection.db?.collections();
-  for (const collection of collections || []) {
-    await collection.deleteMany({});
+  const models = mongoose.modelNames();
+  for (const name of models) {
+    await mongoose.model(name).deleteMany({});
   }
 };

@@ -55,5 +55,15 @@ export type AuthApiSpec = Tspec.DefineApiSpec<{
         };
       };
     };
+    "/refresh": {
+      get: {
+        summary: "Refresh token";
+        body: Record<string, string>;
+        responses: {
+          200: ISuccessPayload<Record<string, string>>;
+          401: IErrorPayload & { details?: string };
+        };
+      };
+    };
   };
 }>;

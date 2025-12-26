@@ -11,6 +11,7 @@ import {
   verifyEmailVerificationCode,
   resendEmailVerificationCode,
   loginUser,
+  refreshToken,
 } from "../auth.controller";
 
 const authRouter = Router();
@@ -31,5 +32,6 @@ authRouter.post(
   resendEmailVerificationCode,
 );
 authRouter.post("/login", validateResource(loginSchema), loginUser);
+authRouter.get("/refresh", refreshToken);
 
 export default authRouter;

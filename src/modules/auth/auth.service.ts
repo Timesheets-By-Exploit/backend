@@ -14,7 +14,7 @@ import { hashWithCrypto } from "@utils/encryptors";
 import { RefreshTokenModel } from "./refreshToken.model";
 import { DEFAULT_REFRESH_DAYS } from "@config/constants";
 import { generateRandomTokenWithCrypto } from "@utils/generators";
-import { generateAccessToken } from "./auth.utils";
+import { generateAccessToken, rotateRefreshToken } from "./utils/auth.tokens";
 
 const AuthService = {
   signupOwner: async (
@@ -176,6 +176,41 @@ const AuthService = {
         expiresAt,
       },
     };
+  },
+  rotateRefreshToken: async (
+    rawRefreshToken: string,
+    ip?: string,
+  ): Promise<
+    | {
+        success: true;
+        data: {
+          refreshToken: string;
+          refreshTokenId: string | undefined;
+          accessToken: string;
+          expiresAt: Date;
+        };
+      }
+    | { success: false; error: string }
+  > => {
+    try {
+      const { refreshToken, refreshTokenId, expiresAt, accessToken } =
+        await rotateRefreshToken(rawRefreshToken, ip);
+
+      return {
+        success: true,
+        data: {
+          refreshToken,
+          refreshTokenId: refreshTokenId?.toString(),
+          accessToken,
+          expiresAt,
+        },
+      };
+    } catch (err) {
+      return {
+        success: false,
+        error: (err as unknown as Error).message,
+      };
+    }
   },
 };
 

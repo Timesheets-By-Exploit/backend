@@ -67,11 +67,11 @@ describe("Auth Login", () => {
     const refresh = cookieArray.find((c) => c.startsWith("refresh_token="));
 
     expect(access).toContain("HttpOnly");
-    expect(access).toContain("SameSite=Strict");
+    expect(access).toContain("SameSite=Lax");
     expect(access).toContain("Path=/");
 
     expect(refresh).toContain("HttpOnly");
-    expect(refresh).toContain("SameSite=Strict");
+    expect(refresh).toContain("SameSite=Lax");
     expect(refresh).toContain("Path=/auth/refresh");
 
     expect(res.body.success).toBe(true);

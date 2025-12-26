@@ -10,6 +10,7 @@ import getTSpec from "@docs/tspecGenerator";
 const app: Application = express();
 
 (async () => {
+  app.set("trust proxy", 1);
   app.use(cors());
   app.use(express.json());
   app.use(morgan("dev"));
