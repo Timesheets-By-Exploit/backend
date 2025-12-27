@@ -2,6 +2,9 @@ import { Request, Response, NextFunction } from "express";
 import AuthService from "./auth.service";
 import {
   EmailVerificationOutput,
+  GetMeOutput,
+  LoginOutput,
+  LogoutOutput,
   SendEmailVerificationCodeOutput,
   SignupInput,
   SignupOutput,
@@ -10,6 +13,9 @@ import AppError from "@utils/AppError";
 import { IErrorPayload, ISuccessPayload } from "src/types";
 import UserService from "@modules/user/user.service";
 import { routeTryCatcher } from "@utils/routeTryCatcher";
+import { compareHashedBcryptString } from "@utils/encryptors";
+import { serializeUser } from "@modules/user/user.utils";
+import { setAuthCookies, clearAuthCookies } from "./utils/auth.cookies";
 
 export const signupOrganizationOwner = routeTryCatcher(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -24,7 +30,7 @@ export const signupOrganizationOwner = routeTryCatcher(
 
     return res.status(201).json({
       success: true,
-      message: "Owner signup successful",
+      message: "Signup successful",
       data: (result as ISuccessPayload<SignupOutput>).data,
     });
   },
@@ -63,5 +69,106 @@ export const resendEmailVerificationCode = routeTryCatcher(
     return res
       .status(200)
       .json(result as ISuccessPayload<SendEmailVerificationCodeOutput>);
+  },
+);
+
+export const loginUser = routeTryCatcher(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const user = await UserService.getUserByEmail(req.body.email);
+    if (!user) return next(AppError.badRequest("Invalid credentials"));
+    const isValidPassword = await compareHashedBcryptString(
+      req.body.password,
+      user.password,
+    );
+    if (!isValidPassword)
+      return next(AppError.badRequest("Invalid credentials"));
+    if (user.isEmailVerified !== true)
+      return next(AppError.forbidden("Email not verified"));
+    const ip = req.ip;
+    const userAgent = req.get("User-Agent") || "";
+    const result = await AuthService.createTokensForUser(
+      user,
+      String(req.body.rememberMe) === "true",
+      { ip, userAgent },
+    );
+
+    setAuthCookies({
+      res,
+      refreshToken: result.data.refreshToken,
+      refreshTokenExpiresAt: result.data.expiresAt,
+      accessToken: result.data.accessToken,
+    });
+
+    return res.json({
+      success: true,
+      data: {
+        user: serializeUser(user),
+      },
+    } as ISuccessPayload<LoginOutput>);
+  },
+);
+
+export const refreshToken = routeTryCatcher(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const token = req.signedCookies?.refresh_token;
+    if (!token) return next(AppError.unauthorized("Unauthenticated"));
+
+    const result = await AuthService.rotateRefreshToken(token, req.ip);
+    if (!result.success) {
+      res.clearCookie("access_token");
+      res.clearCookie("refresh_token");
+      return next(AppError.unauthorized(result.error || "Session expired"));
+    }
+
+    setAuthCookies({
+      res,
+      refreshToken: result.data.refreshToken,
+      refreshTokenExpiresAt: result.data.expiresAt,
+      accessToken: result.data.accessToken,
+    });
+
+    return res.json({ success: true });
+  },
+);
+
+export const getCurrentUser = routeTryCatcher(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user;
+
+    if (!user) {
+      return next(AppError.unauthorized("User not found"));
+    }
+
+    return res.json({
+      success: true,
+      data: {
+        user: serializeUser(user),
+      },
+    } as ISuccessPayload<GetMeOutput>);
+  },
+);
+
+export const logoutUser = routeTryCatcher(
+  async (req: Request, res: Response) => {
+    const token = req.signedCookies?.refresh_token;
+    clearAuthCookies(res);
+    if (!token) {
+      return res.json({
+        success: true,
+        data: { message: "Logged out successfully" },
+      } as ISuccessPayload<LogoutOutput>);
+    }
+
+    const result = await AuthService.logout(token, req.ip);
+    if (!result.success) {
+      return res.json({
+        success: true,
+        data: { message: "Logged out successfully" },
+      } as ISuccessPayload<LogoutOutput>);
+    }
+    return res.json({
+      success: true,
+      data: (result as ISuccessPayload<LogoutOutput>).data,
+    } as ISuccessPayload<LogoutOutput>);
   },
 );
