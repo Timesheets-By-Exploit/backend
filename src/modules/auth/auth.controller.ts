@@ -4,6 +4,7 @@ import {
   EmailVerificationOutput,
   GetMeOutput,
   LoginOutput,
+  LogoutOutput,
   SendEmailVerificationCodeOutput,
   SignupInput,
   SignupOutput,
@@ -14,7 +15,7 @@ import UserService from "@modules/user/user.service";
 import { routeTryCatcher } from "@utils/routeTryCatcher";
 import { compareHashedBcryptString } from "@utils/encryptors";
 import { serializeUser } from "@modules/user/user.utils";
-import { setAuthCookies } from "./utils/auth.cookies";
+import { setAuthCookies, clearAuthCookies } from "./utils/auth.cookies";
 
 export const signupOrganizationOwner = routeTryCatcher(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -144,5 +145,30 @@ export const getCurrentUser = routeTryCatcher(
         user: serializeUser(user),
       },
     } as ISuccessPayload<GetMeOutput>);
+  },
+);
+
+export const logoutUser = routeTryCatcher(
+  async (req: Request, res: Response) => {
+    const token = req.signedCookies?.refresh_token;
+    clearAuthCookies(res);
+    if (!token) {
+      return res.json({
+        success: true,
+        data: { message: "Logged out successfully" },
+      } as ISuccessPayload<LogoutOutput>);
+    }
+
+    const result = await AuthService.logout(token, req.ip);
+    if (!result.success) {
+      return res.json({
+        success: true,
+        data: { message: "Logged out successfully" },
+      } as ISuccessPayload<LogoutOutput>);
+    }
+    return res.json({
+      success: true,
+      data: (result as ISuccessPayload<LogoutOutput>).data,
+    } as ISuccessPayload<LogoutOutput>);
   },
 );

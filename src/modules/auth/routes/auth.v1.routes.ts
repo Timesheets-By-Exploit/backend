@@ -14,6 +14,7 @@ import {
   loginUser,
   refreshToken,
   getCurrentUser,
+  logoutUser,
 } from "../auth.controller";
 
 const authRouter = Router();
@@ -36,5 +37,6 @@ authRouter.post(
 authRouter.post("/login", validateResource(loginSchema), loginUser);
 authRouter.get("/refresh", refreshToken);
 authRouter.get("/me", authenticate, getCurrentUser);
+authRouter.post("/logout", logoutUser);
 
 export default authRouter;

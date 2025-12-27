@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import * as cookie from "cookie";
 
 const MAX_RETRIES = 8;
 const BASE_DELAY_MS = 50;
@@ -37,4 +38,43 @@ export const clearDB = async () => {
   });
 
   await mongoose.connection.syncIndexes();
+};
+
+export const extractSignedCookie = (
+  setCookieHeader: string | string[] | undefined,
+  cookieName: string,
+): string | null => {
+  if (!setCookieHeader) return null;
+
+  const cookieArray = Array.isArray(setCookieHeader)
+    ? setCookieHeader
+    : [setCookieHeader];
+
+  const cookieString = cookieArray.find((c) => c.startsWith(`${cookieName}=`));
+  if (!cookieString) return null;
+
+  const parsed = cookie.parse(cookieString);
+  const signedValue = parsed[cookieName];
+
+  if (!signedValue || !signedValue.startsWith("s:")) {
+    return null;
+  }
+
+  return signedValue;
+};
+
+export const extractSignedCookies = (
+  setCookieHeader: string | string[] | undefined,
+  cookieNames: string[],
+): Record<string, string> => {
+  const result: Record<string, string> = {};
+
+  for (const cookieName of cookieNames) {
+    const value = extractSignedCookie(setCookieHeader, cookieName);
+    if (value) {
+      result[cookieName] = value;
+    }
+  }
+
+  return result;
 };

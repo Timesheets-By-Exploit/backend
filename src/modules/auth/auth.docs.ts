@@ -5,6 +5,7 @@ import {
   GetMeOutput,
   loginInput,
   LoginOutput,
+  LogoutOutput,
   resendEmailVerificationCodeInput,
   SignupInput,
 } from "./auth.types";
@@ -71,6 +72,16 @@ export type AuthApiSpec = Tspec.DefineApiSpec<{
         summary: "Get current authenticated user";
         responses: {
           200: ISuccessPayload<GetMeOutput>;
+          401: IErrorPayload;
+        };
+      };
+    };
+    "/logout": {
+      post: {
+        summary: "Logout user";
+        responses: {
+          200: ISuccessPayload<LogoutOutput>;
+          400: IErrorPayload;
           401: IErrorPayload;
         };
       };

@@ -14,7 +14,11 @@ import { hashWithCrypto } from "@utils/encryptors";
 import { RefreshTokenModel } from "./refreshToken.model";
 import { DEFAULT_REFRESH_DAYS } from "@config/constants";
 import { generateRandomTokenWithCrypto } from "@utils/generators";
-import { generateAccessToken, rotateRefreshToken } from "./utils/auth.tokens";
+import {
+  generateAccessToken,
+  rotateRefreshToken,
+  revokeRefreshToken,
+} from "./utils/auth.tokens";
 
 const AuthService = {
   signupOwner: async (
@@ -212,6 +216,23 @@ const AuthService = {
           accessToken,
           expiresAt,
         },
+      };
+    } catch (err) {
+      return {
+        success: false,
+        error: (err as unknown as Error).message,
+      };
+    }
+  },
+  logout: async (
+    rawRefreshToken: string | null,
+    ip?: string,
+  ): Promise<ISuccessPayload<{ message: string }> | IErrorPayload> => {
+    try {
+      await revokeRefreshToken(rawRefreshToken, ip);
+      return {
+        success: true,
+        data: { message: "Logged out successfully" },
       };
     } catch (err) {
       return {

@@ -70,3 +70,7 @@ export type GetMeOutput = {
     updatedAt: Date;
   };
 };
+
+export type LogoutOutput = {
+  message: string;
+};
