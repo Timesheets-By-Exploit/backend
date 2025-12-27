@@ -8,6 +8,7 @@ export default {
   transform: {
     "^.+\\.(t|j)sx?$": "ts-jest",
   },
+  maxWorkers: 1,
   transformIgnorePatterns: ["node_modules/(?!(.*@faker-js/faker))"],
   moduleNameMapper: {
     "^@app$": "<rootDir>/src/app.ts",

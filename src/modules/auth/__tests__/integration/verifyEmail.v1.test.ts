@@ -5,9 +5,13 @@ import { OrganizationFactory } from "@tests/factories/organization.factory";
 import { sendEmailWithTemplate } from "@services/email.service";
 import UserModel from "@modules/user/user.model";
 import { convertTimeToMilliseconds } from "@utils/index";
-import { TIME_UNITS } from "@config/constants";
+import { clearDB } from "@tests/utils";
 
 jest.mock("@services/email.service");
+
+beforeEach(async () => {
+  await clearDB();
+});
 
 beforeEach(() => {
   (sendEmailWithTemplate as jest.Mock).mockResolvedValue({
@@ -26,16 +30,19 @@ describe("Email Verification", () => {
     const orgData = OrganizationFactory.generate();
     const user = {
       ...UserFactory.generate(),
+      createOrg: true,
       organizationName: orgData.name,
       organizationSize: orgData.size,
     };
 
-    await request(app).post("/api/v1/auth/signup").send(user);
-
+    const signupResponse = await request(app)
+      .post("/api/v1/auth/signup")
+      .send(user);
     const verifyEmailRes = await request(app)
       .post("/api/v1/auth/verify-email")
       .send({ email: user.email, emailVerificationCode: "RANDOM" });
-
+    expect(signupResponse.status).toBe(201);
+    expect(signupResponse.body.success).toBe(true);
     expect(verifyEmailRes.status).toBe(400);
     expect(verifyEmailRes.body.success).toBe(false);
   });
@@ -44,6 +51,7 @@ describe("Email Verification", () => {
     const orgData = OrganizationFactory.generate();
     const user = {
       ...UserFactory.generate(),
+      createOrg: true,
       organizationName: orgData.name,
       organizationSize: orgData.size,
     };
@@ -73,6 +81,7 @@ describe("Email Verification", () => {
     const orgData = OrganizationFactory.generate();
     const user = {
       ...UserFactory.generate(),
+      createOrg: true,
       organizationName: orgData.name,
       organizationSize: orgData.size,
     };
@@ -94,6 +103,7 @@ describe("Email Verification", () => {
     const orgData = OrganizationFactory.generate();
     const user = {
       ...UserFactory.generate(),
+      createOrg: true,
       organizationName: orgData.name,
       organizationSize: orgData.size,
     };
@@ -124,6 +134,7 @@ describe("Email Verification", () => {
     const orgData = OrganizationFactory.generate();
     const user = {
       ...UserFactory.generate(),
+      createOrg: true,
       organizationName: orgData.name,
       organizationSize: orgData.size,
     };

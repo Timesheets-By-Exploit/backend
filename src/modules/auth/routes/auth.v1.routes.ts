@@ -1,6 +1,8 @@
 import { Router } from "express";
 import validateResource from "@middlewares/validators";
+import authenticate from "@middlewares/authenticate";
 import {
+  loginSchema,
   resendEmailVerificationCodeSchema,
   signupSchema,
   verifyEmailSchema,
@@ -9,6 +11,9 @@ import {
   signupOrganizationOwner,
   verifyEmailVerificationCode,
   resendEmailVerificationCode,
+  loginUser,
+  refreshToken,
+  getCurrentUser,
 } from "../auth.controller";
 
 const authRouter = Router();
@@ -28,5 +33,8 @@ authRouter.post(
   validateResource(resendEmailVerificationCodeSchema),
   resendEmailVerificationCode,
 );
+authRouter.post("/login", validateResource(loginSchema), loginUser);
+authRouter.get("/refresh", refreshToken);
+authRouter.get("/me", authenticate, getCurrentUser);
 
 export default authRouter;

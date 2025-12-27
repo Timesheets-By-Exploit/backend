@@ -9,6 +9,7 @@ export type UNIT_OF_TIME =
 export interface IErrorPayload {
   success: boolean;
   error: string;
+  details?: string;
 }
 export interface ISuccessPayload<T> {
   success: boolean;

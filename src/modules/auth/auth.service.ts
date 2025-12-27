@@ -10,6 +10,11 @@ import mongoose from "mongoose";
 import { IUser } from "@modules/user/user.types";
 import { sendEmailWithTemplate } from "@services/email.service";
 import { ISuccessPayload, IErrorPayload } from "src/types";
+import { hashWithCrypto } from "@utils/encryptors";
+import { RefreshTokenModel } from "./refreshToken.model";
+import { DEFAULT_REFRESH_DAYS } from "@config/constants";
+import { generateRandomTokenWithCrypto } from "@utils/generators";
+import { generateAccessToken, rotateRefreshToken } from "./utils/auth.tokens";
 
 const AuthService = {
   signupOwner: async (
@@ -20,50 +25,61 @@ const AuthService = {
       lastName,
       email,
       password,
+      createOrg = false,
       organizationName,
       organizationSize,
     } = input;
     const existingUser = await UserModel.exists({ email });
     if (existingUser) return { success: false, error: "User already exists" };
-
+    let createdUser;
+    let organization;
     const session = await mongoose.startSession();
     session.startTransaction();
     try {
-      const createdUser = new UserModel({
+      createdUser = new UserModel({
         firstName,
         lastName,
         email,
         password,
         role: "owner",
       });
-      const organization = new OrganizationModel({
-        name: organizationName,
-        owner: createdUser._id,
-        size: organizationSize,
-      });
-      createdUser.organization = organization._id;
-      await createdUser.save({ session });
-      await organization.save({ session });
-      await session.commitTransaction();
-      const res = await AuthService.sendVerificationEmail(createdUser);
 
-      return {
-        success: true,
-        data: {
-          userId: createdUser._id.toString(),
-          organizationId: organization._id.toString(),
-          emailSent: res.success
-            ? (res as ISuccessPayload<SendEmailVerificationCodeOutput>).data
-                .emailSent
-            : false,
-        },
-      };
+      if (createOrg) {
+        if (!organizationName || organizationSize === undefined) {
+          throw new Error("Organization name and size are required");
+        }
+        organization = new OrganizationModel({
+          name: organizationName,
+          owner: createdUser._id,
+          size: organizationSize,
+        });
+        createdUser.organization = organization._id;
+        await organization.save({ session });
+      }
+
+      await createdUser.save({ session });
+      await session.commitTransaction();
     } catch (err) {
-      await session.abortTransaction();
+      if (session.inTransaction()) {
+        await session.abortTransaction();
+      }
       throw err;
     } finally {
       session.endSession();
     }
+    const res = await AuthService.sendVerificationEmail(createdUser);
+
+    return {
+      success: true,
+      data: {
+        userId: createdUser._id.toString(),
+        ...(organization && { organizationId: organization._id.toString() }),
+        emailSent: res.success
+          ? (res as ISuccessPayload<SendEmailVerificationCodeOutput>).data
+              .emailSent
+          : false,
+      },
+    };
   },
   sendVerificationEmail: async (
     user: IUser,
@@ -127,6 +143,82 @@ const AuthService = {
       };
     await user.clearEmailVerificationData();
     return { success: true, data: { email, isEmailVerified: true } };
+  },
+  createTokensForUser: async (
+    user: IUser,
+    rememberMe = false,
+    metaData?: {
+      ip?: string | undefined;
+      userAgent?: string | undefined;
+    },
+  ) => {
+    const accessToken = generateAccessToken({
+      id: user._id.toString(),
+      email: user.email,
+    });
+
+    const rawRefreshToken = generateRandomTokenWithCrypto(
+      Number(process.env.REFRESH_TOKEN_BYTES || 64),
+    );
+    const tokenHash = hashWithCrypto(rawRefreshToken);
+
+    const expiresAt = new Date(
+      Date.now() +
+        (rememberMe ? DEFAULT_REFRESH_DAYS : 7) * 24 * 60 * 60 * 1000,
+    );
+
+    const refreshDoc = await RefreshTokenModel.create({
+      user: user._id,
+      tokenHash,
+      expiresAt,
+      createdByIp: metaData?.ip,
+      userAgent: metaData?.userAgent,
+    });
+
+    return {
+      success: true,
+      data: {
+        accessToken,
+        refreshToken: rawRefreshToken,
+        refreshTokenId: refreshDoc._id,
+        expiresAt,
+      },
+    };
+  },
+  rotateRefreshToken: async (
+    rawRefreshToken: string,
+    ip?: string,
+  ): Promise<
+    | {
+        success: true;
+        data: {
+          refreshToken: string;
+          refreshTokenId: string | undefined;
+          accessToken: string;
+          expiresAt: Date;
+        };
+      }
+    | { success: false; error: string }
+  > => {
+    try {
+      const { refreshToken, refreshTokenId, expiresAt, accessToken } =
+        await rotateRefreshToken(rawRefreshToken, ip);
+
+      return {
+        success: true,
+        data: {
+          refreshToken,
+          refreshTokenId: refreshTokenId?.toString(),
+          accessToken,
+          expiresAt,
+        },
+      };
+    } catch (err) {
+      return {
+        success: false,
+        error: (err as unknown as Error).message,
+      };
+    }
   },
 };
 

@@ -6,7 +6,7 @@ export interface IOrganization extends mongoose.Document {
   _id: mongoose.Types.ObjectId;
   name: string;
   slug: string;
-  owner: mongoose.Schema.Types.ObjectId;
+  owner: mongoose.Types.ObjectId;
   domain?: string;
   description?: string;
   createdAt: Date;
