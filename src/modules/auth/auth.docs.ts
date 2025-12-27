@@ -2,10 +2,6 @@ import { Tspec } from "tspec";
 import {
   EmailVerificationInput,
   EmailVerificationOutput,
-  GetMeOutput,
-  loginInput,
-  LoginOutput,
-  LogoutOutput,
   resendEmailVerificationCodeInput,
   SignupInput,
 } from "./auth.types";
@@ -22,7 +18,7 @@ export type AuthApiSpec = Tspec.DefineApiSpec<{
         body: SignupInput;
         responses: {
           201: ISuccessPayload<SignupOutput>;
-          400: IErrorPayload;
+          400: IErrorPayload & { details?: string };
         };
       };
     };
@@ -32,7 +28,7 @@ export type AuthApiSpec = Tspec.DefineApiSpec<{
         body: EmailVerificationInput;
         responses: {
           200: ISuccessPayload<EmailVerificationOutput>;
-          400: IErrorPayload;
+          400: IErrorPayload & { details?: string };
         };
       };
     };
@@ -42,47 +38,7 @@ export type AuthApiSpec = Tspec.DefineApiSpec<{
         body: resendEmailVerificationCodeInput;
         responses: {
           200: ISuccessPayload<EmailVerificationOutput>;
-          400: IErrorPayload;
-        };
-      };
-    };
-    "/login": {
-      post: {
-        summary: "Login User";
-        body: loginInput;
-        responses: {
-          200: ISuccessPayload<LoginOutput>;
-          400: IErrorPayload;
-          403: IErrorPayload;
-        };
-      };
-    };
-    "/refresh": {
-      get: {
-        summary: "Refresh token";
-        body: Record<string, string>;
-        responses: {
-          200: ISuccessPayload<Record<string, string>>;
-          401: IErrorPayload;
-        };
-      };
-    };
-    "/me": {
-      get: {
-        summary: "Get current authenticated user";
-        responses: {
-          200: ISuccessPayload<GetMeOutput>;
-          401: IErrorPayload;
-        };
-      };
-    };
-    "/logout": {
-      post: {
-        summary: "Logout user";
-        responses: {
-          200: ISuccessPayload<LogoutOutput>;
-          400: IErrorPayload;
-          401: IErrorPayload;
+          400: IErrorPayload & { details?: string };
         };
       };
     };

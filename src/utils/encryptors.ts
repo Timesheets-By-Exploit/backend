@@ -9,6 +9,3 @@ export async function hashWithBcrypt(str: string, salt?: string) {
   if (!salt) salt = await bcrypt.genSalt(10);
   return await bcrypt.hash(str, salt);
 }
-export async function compareHashedBcryptString(plain: string, hashed: string) {
-  return await bcrypt.compare(plain, hashed);
-}

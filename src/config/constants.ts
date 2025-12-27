@@ -9,5 +9,3 @@ export const TIME_UNITS = {
   secs: 1000,
   sec: 1000,
 };
-
-export const DEFAULT_REFRESH_DAYS = 30;

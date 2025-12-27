@@ -1,9 +1,10 @@
-import { ZodSchema, ZodError, ZodIssue } from "zod";
+import { AnyZodObject, ZodError, ZodIssue } from "zod";
 import { Request, Response, NextFunction } from "express";
 import AppError from "@utils/AppError";
 
 const validateResource =
-  (schema: ZodSchema) => (req: Request, _res: Response, next: NextFunction) => {
+  (schema: AnyZodObject) =>
+  (req: Request, _res: Response, next: NextFunction) => {
     try {
       schema.parse(req.body);
       next();

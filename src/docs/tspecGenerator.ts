@@ -15,6 +15,6 @@ const options: Tspec.GenerateParams = {
   ignoreErrors: true,
 };
 
-export async function getTSpec() {
+export default async function getTSpec() {
   return await generateTspec(options);
 }
