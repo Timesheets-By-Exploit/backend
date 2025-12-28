@@ -4,11 +4,15 @@ import {
   ChangePasswordOutput,
   EmailVerificationInput,
   EmailVerificationOutput,
+  ForgotPasswordInput,
+  ForgotPasswordOutput,
   GetMeOutput,
   loginInput,
   LoginOutput,
   LogoutOutput,
   resendEmailVerificationCodeInput,
+  ResetPasswordInput,
+  ResetPasswordOutput,
   SignupInput,
 } from "./auth.types";
 import { ISuccessPayload, IErrorPayload } from "src/types";
@@ -96,6 +100,26 @@ export type AuthApiSpec = Tspec.DefineApiSpec<{
           200: ISuccessPayload<ChangePasswordOutput>;
           400: IErrorPayload & { details?: string };
           401: IErrorPayload & { details?: string };
+        };
+      };
+    };
+    "/forgot-password": {
+      post: {
+        summary: "Send password reset email";
+        body: ForgotPasswordInput;
+        responses: {
+          200: ISuccessPayload<ForgotPasswordOutput>;
+          400: IErrorPayload;
+        };
+      };
+    };
+    "/reset-password": {
+      post: {
+        summary: "Reset password with reset code";
+        body: ResetPasswordInput;
+        responses: {
+          200: ISuccessPayload<ResetPasswordOutput>;
+          400: IErrorPayload;
         };
       };
     };

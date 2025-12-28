@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+export const emailSchema = z.string().email("Invalid email format");
+
 export const passwordSchema = z
   .string()
   .min(8, "Password must be at least 8 characters long")
@@ -15,7 +17,7 @@ export const signupSchema = z
   .object({
     firstName: z.string().min(2, "Name must be at least 2 characters long"),
     lastName: z.string().min(2, "Name must be at least 2 characters long"),
-    email: z.string().email("Invalid email format"),
+    email: emailSchema,
     password: passwordSchema,
     createOrg: z.boolean().optional().default(false),
     organizationName: z
@@ -47,15 +49,15 @@ export const verifyEmailSchema = z.object({
   emailVerificationCode: z
     .string()
     .length(6, "Email verification code must be a 6 digit number"),
-  email: z.string().email(),
+  email: emailSchema,
 });
 
 export const resendEmailVerificationCodeSchema = z.object({
-  email: z.string().email(),
+  email: emailSchema,
 });
 
 export const loginSchema = z.object({
-  email: z.string().email("Invalid email format"),
+  email: emailSchema,
   password: z.string(),
 });
 
@@ -68,3 +70,15 @@ export const changePasswordSchema = z
     message: "New password must be different from current password",
     path: ["newPassword"],
   });
+
+export const forgotPasswordSchema = z.object({
+  email: emailSchema,
+});
+
+export const resetPasswordSchema = z.object({
+  email: emailSchema,
+  passwordResetCode: z
+    .string()
+    .length(6, "Password reset code must be a 6 digit number"),
+  newPassword: passwordSchema,
+});
