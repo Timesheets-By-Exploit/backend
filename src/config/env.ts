@@ -14,6 +14,8 @@ const envSchema = z.object({
   FROM_NAME: z.string(),
   JWT_ACCESS_EXPIRES_IN: z.string(),
   COOKIE_SECRET: z.string(),
+  EMAIL_VERIFICATION_TEMPLATE_KEY: z.string(),
+  PASSWORD_RESET_TEMPLATE_KEY: z.string(),
 });
 
 const isTest = process.env.NODE_ENV === "test";
@@ -33,6 +35,8 @@ const env = isTest
         FROM_NAME: "",
         JWT_ACCESS_EXPIRES_IN: "",
         COOKIE_SECRET: "testsecret",
+        EMAIL_VERIFICATION_TEMPLATE_KEY: "",
+        PASSWORD_RESET_TEMPLATE_KEY: "",
       },
       error: envSchema.safeParse(process.env).error,
     }
@@ -55,4 +59,6 @@ export const {
   SUPPORT_EMAIL,
   JWT_ACCESS_EXPIRES_IN,
   COOKIE_SECRET,
+  EMAIL_VERIFICATION_TEMPLATE_KEY,
+  PASSWORD_RESET_TEMPLATE_KEY,
 } = env.data;

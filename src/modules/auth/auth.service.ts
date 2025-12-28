@@ -1,6 +1,8 @@
 import UserModel from "@modules/user/user.model";
 import {
   EmailVerificationOutput,
+  ForgotPasswordOutput,
+  ResetPasswordOutput,
   SendEmailVerificationCodeOutput,
   SignupInput,
   SignupOutput,
@@ -14,6 +16,10 @@ import { hashWithCrypto } from "@utils/encryptors";
 import { RefreshTokenModel } from "./refreshToken.model";
 import { DEFAULT_REFRESH_DAYS } from "@config/constants";
 import { generateRandomTokenWithCrypto } from "@utils/generators";
+import {
+  EMAIL_VERIFICATION_TEMPLATE_KEY,
+  PASSWORD_RESET_TEMPLATE_KEY,
+} from "@config/env";
 import {
   generateAccessToken,
   rotateRefreshToken,
@@ -108,8 +114,7 @@ const AuthService = {
           name: user.firstName,
         },
         subject: "Verify your email",
-        mail_template_key:
-          "2d6f.45d8a1809f293f51.k1.46541e40-afd8-11f0-a465-fae9afc80e45.19a0fb93624",
+        mail_template_key: EMAIL_VERIFICATION_TEMPLATE_KEY,
         template_alias: "email-verification",
       });
       return {
@@ -271,6 +276,94 @@ const AuthService = {
         success: false,
         error: (err as unknown as Error).message,
       };
+    }
+  },
+  sendPasswordResetEmail: async (
+    email: string,
+  ): Promise<ISuccessPayload<ForgotPasswordOutput> | IErrorPayload> => {
+    try {
+      const user = await UserModel.findOne({ email });
+      if (!user) {
+        return {
+          success: true,
+          data: {
+            emailSent: true,
+            message: "Password reset email sent successfully",
+          },
+        };
+      }
+
+      const code = user.generatePasswordResetCode();
+      await user.save();
+
+      const emailSentResponse = await sendEmailWithTemplate({
+        to: [
+          {
+            email_address: {
+              address: user.email,
+              name: `${user.firstName} ${user.lastName}`,
+            },
+          },
+        ],
+        merge_info: {
+          passwordResetCode: code,
+          passwordResetExpiry: "30 minutes",
+          name: user.firstName,
+        },
+        subject: "Reset your password",
+        mail_template_key: PASSWORD_RESET_TEMPLATE_KEY,
+        template_alias: "password-reset",
+      });
+
+      if (!emailSentResponse.success) {
+        return {
+          success: false,
+          error:
+            emailSentResponse.error || "Failed to send password reset email",
+        };
+      }
+
+      return {
+        success: true,
+        data: {
+          emailSent: emailSentResponse.emailSent || false,
+          message: "Password reset email sent successfully",
+        },
+      };
+    } catch (err) {
+      return { success: false, error: (err as Error).message };
+    }
+  },
+  resetPassword: async (
+    email: string,
+    code: string,
+    newPassword: string,
+  ): Promise<ISuccessPayload<ResetPasswordOutput> | IErrorPayload> => {
+    try {
+      const user = await UserModel.findOne({ email });
+      if (!user)
+        return {
+          success: false,
+          error: "Invalid or expired password reset code",
+        };
+
+      const isValidCode = user.verifyPasswordResetCode(code);
+      if (!isValidCode)
+        return {
+          success: false,
+          error: "Invalid or expired password reset code",
+        };
+
+      await user.clearPasswordResetData();
+      user.password = newPassword;
+      await user.save();
+
+      return {
+        success: true,
+        data: { message: "Password reset successfully" },
+      };
+    } catch (err) {
+      return { success: false, error: (err as Error).message };
     }
   },
 };

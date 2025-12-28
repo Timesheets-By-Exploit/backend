@@ -1,8 +1,10 @@
 import mongoose from "mongoose";
 import {
   changePasswordSchema,
+  forgotPasswordSchema,
   loginSchema,
   resendEmailVerificationCodeSchema,
+  resetPasswordSchema,
   signupSchema,
   verifyEmailSchema,
 } from "./auth.validators";
@@ -79,5 +81,18 @@ export type LogoutOutput = {
 export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
 
 export type ChangePasswordOutput = {
+  message: string;
+};
+
+export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
+
+export type ForgotPasswordOutput = {
+  emailSent: boolean;
+  message: string;
+};
+
+export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
+
+export type ResetPasswordOutput = {
   message: string;
 };
