@@ -10,9 +10,9 @@ import UserModel from "@modules/user/user.model";
 import * as cookie from "cookie";
 import * as signature from "cookie-signature";
 import { COOKIE_SECRET } from "@config/env";
+import { TEST_CONSTANTS } from "../helpers/testHelpers";
 
-const verifiedUserEmail = "verified@example.com";
-const testPassword = "secret123";
+const { verifiedUserEmail, testPassword } = TEST_CONSTANTS;
 
 beforeEach(async () => {
   await clearDB();
