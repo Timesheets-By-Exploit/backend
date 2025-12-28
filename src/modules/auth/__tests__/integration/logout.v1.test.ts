@@ -8,9 +8,9 @@ import {
 } from "@tests/utils";
 import { RefreshTokenModel } from "@modules/auth/refreshToken.model";
 import UserModel from "@modules/user/user.model";
+import { TEST_CONSTANTS } from "../helpers/testHelpers";
 
-const verifiedUserEmail = "verified@example.com";
-const testPassword = "secret123";
+const { verifiedUserEmail, testPassword } = TEST_CONSTANTS;
 
 beforeEach(async () => {
   await clearDB();

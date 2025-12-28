@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import AuthService from "./auth.service";
 import {
+  ChangePasswordOutput,
   EmailVerificationOutput,
   GetMeOutput,
   LoginOutput,
@@ -170,5 +171,31 @@ export const logoutUser = routeTryCatcher(
       success: true,
       data: (result as ISuccessPayload<LogoutOutput>).data,
     } as ISuccessPayload<LogoutOutput>);
+  },
+);
+
+export const changePassword = routeTryCatcher(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user;
+
+    if (!user) return next(AppError.unauthorized("User not found"));
+
+    const result = await AuthService.changePassword(
+      user,
+      req.body.currentPassword,
+      req.body.newPassword,
+    );
+
+    if (!result.success)
+      return next(
+        AppError.badRequest(
+          (result as IErrorPayload).error || "Password change failed",
+        ),
+      );
+
+    return res.json({
+      success: true,
+      data: (result as ISuccessPayload<ChangePasswordOutput>).data,
+    } as ISuccessPayload<ChangePasswordOutput>);
   },
 );
