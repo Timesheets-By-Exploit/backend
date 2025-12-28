@@ -24,7 +24,7 @@ export type AuthApiSpec = Tspec.DefineApiSpec<{
   paths: {
     "/signup": {
       post: {
-        summary: "Signup an organization owner";
+        summary: "Signup a new user";
         body: SignupInput;
         responses: {
           201: ISuccessPayload<SignupOutput>;

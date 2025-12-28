@@ -7,8 +7,6 @@ import {
   SignupInput,
   SignupOutput,
 } from "./auth.types";
-import OrganizationModel from "@modules/organization/organization.model";
-import mongoose from "mongoose";
 import { IUser } from "@modules/user/user.types";
 import { sendEmailWithTemplate } from "@services/email.service";
 import { ISuccessPayload, IErrorPayload } from "src/types";
@@ -27,63 +25,28 @@ import {
 } from "./utils/auth.tokens";
 
 const AuthService = {
-  signupOwner: async (
+  signup: async (
     input: SignupInput,
   ): Promise<ISuccessPayload<SignupOutput> | IErrorPayload> => {
-    const {
+    const { firstName, lastName, email, password } = input;
+    const existingUser = await UserModel.exists({ email });
+    if (existingUser) return { success: false, error: "User already exists" };
+
+    const createdUser = new UserModel({
       firstName,
       lastName,
       email,
       password,
-      createOrg = false,
-      organizationName,
-      organizationSize,
-    } = input;
-    const existingUser = await UserModel.exists({ email });
-    if (existingUser) return { success: false, error: "User already exists" };
-    let createdUser;
-    let organization;
-    const session = await mongoose.startSession();
-    session.startTransaction();
-    try {
-      createdUser = new UserModel({
-        firstName,
-        lastName,
-        email,
-        password,
-        role: "owner",
-      });
+      role: "owner",
+    });
 
-      if (createOrg) {
-        if (!organizationName || organizationSize === undefined) {
-          throw new Error("Organization name and size are required");
-        }
-        organization = new OrganizationModel({
-          name: organizationName,
-          owner: createdUser._id,
-          size: organizationSize,
-        });
-        createdUser.organization = organization._id;
-        await organization.save({ session });
-      }
-
-      await createdUser.save({ session });
-      await session.commitTransaction();
-    } catch (err) {
-      if (session.inTransaction()) {
-        await session.abortTransaction();
-      }
-      throw err;
-    } finally {
-      session.endSession();
-    }
+    await createdUser.save();
     const res = await AuthService.sendVerificationEmail(createdUser);
 
     return {
       success: true,
       data: {
         userId: createdUser._id.toString(),
-        ...(organization && { organizationId: organization._id.toString() }),
         emailSent: res.success
           ? (res as ISuccessPayload<SendEmailVerificationCodeOutput>).data
               .emailSent

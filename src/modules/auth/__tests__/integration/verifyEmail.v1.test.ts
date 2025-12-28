@@ -1,7 +1,6 @@
 import request from "supertest";
 import app from "@app";
 import { UserFactory } from "@tests/factories/user.factory";
-import { OrganizationFactory } from "@tests/factories/organization.factory";
 import { sendEmailWithTemplate } from "@services/email.service";
 import UserModel from "@modules/user/user.model";
 import { convertTimeToMilliseconds } from "@utils/index";
@@ -27,13 +26,7 @@ function getVerificationCode(index = 0) {
 
 describe("Email Verification", () => {
   it("should not verify user's email with invalid code", async () => {
-    const orgData = OrganizationFactory.generate();
-    const user = {
-      ...UserFactory.generate(),
-      createOrg: true,
-      organizationName: orgData.name,
-      organizationSize: orgData.size,
-    };
+    const user = UserFactory.generate();
 
     const signupResponse = await request(app)
       .post("/api/v1/auth/signup")
@@ -48,13 +41,7 @@ describe("Email Verification", () => {
   });
 
   it("should not verify user's email with expired code", async () => {
-    const orgData = OrganizationFactory.generate();
-    const user = {
-      ...UserFactory.generate(),
-      createOrg: true,
-      organizationName: orgData.name,
-      organizationSize: orgData.size,
-    };
+    const user = UserFactory.generate();
 
     await request(app).post("/api/v1/auth/signup").send(user);
 
@@ -78,13 +65,7 @@ describe("Email Verification", () => {
   });
 
   it("should verify user's email after signup", async () => {
-    const orgData = OrganizationFactory.generate();
-    const user = {
-      ...UserFactory.generate(),
-      createOrg: true,
-      organizationName: orgData.name,
-      organizationSize: orgData.size,
-    };
+    const user = UserFactory.generate();
 
     await request(app).post("/api/v1/auth/signup").send(user);
 
@@ -100,13 +81,7 @@ describe("Email Verification", () => {
   });
 
   it("should fail if user retries with the same code after being verified", async () => {
-    const orgData = OrganizationFactory.generate();
-    const user = {
-      ...UserFactory.generate(),
-      createOrg: true,
-      organizationName: orgData.name,
-      organizationSize: orgData.size,
-    };
+    const user = UserFactory.generate();
 
     await request(app).post("/api/v1/auth/signup").send(user);
 
@@ -131,13 +106,7 @@ describe("Email Verification", () => {
     expect(secondVerificationResponse.body.success).toBe(false);
   });
   it("resends verification code and previous code is different from new code", async () => {
-    const orgData = OrganizationFactory.generate();
-    const user = {
-      ...UserFactory.generate(),
-      createOrg: true,
-      organizationName: orgData.name,
-      organizationSize: orgData.size,
-    };
+    const user = UserFactory.generate();
 
     await request(app).post("/api/v1/auth/signup").send(user);
 
@@ -151,9 +120,7 @@ describe("Email Verification", () => {
     expect(getVerificationCode() === getVerificationCode(1)).toBeFalsy();
   });
   it("cannot resend verification email to non existent user", async () => {
-    const user = {
-      ...UserFactory.generate(),
-    };
+    const user = UserFactory.generate();
 
     const resendVerificationCodeResponse = await request(app)
       .post("/api/v1/auth/resend-verification-email")
