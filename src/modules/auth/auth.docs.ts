@@ -1,5 +1,7 @@
 import { Tspec } from "tspec";
 import {
+  ChangePasswordInput,
+  ChangePasswordOutput,
   EmailVerificationInput,
   EmailVerificationOutput,
   GetMeOutput,
@@ -83,6 +85,17 @@ export type AuthApiSpec = Tspec.DefineApiSpec<{
           200: ISuccessPayload<LogoutOutput>;
           400: IErrorPayload;
           401: IErrorPayload;
+        };
+      };
+    };
+    "/change-password": {
+      post: {
+        summary: "Change user password";
+        body: ChangePasswordInput;
+        responses: {
+          200: ISuccessPayload<ChangePasswordOutput>;
+          400: IErrorPayload & { details?: string };
+          401: IErrorPayload & { details?: string };
         };
       };
     };

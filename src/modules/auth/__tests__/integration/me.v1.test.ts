@@ -4,12 +4,14 @@ import { seedOneUserWithOrg } from "@tests/helpers/seed";
 import { clearDB } from "@tests/utils";
 import { generateAccessToken } from "@modules/auth/utils/auth.tokens";
 import UserModel from "@modules/user/user.model";
-import * as signature from "cookie-signature";
-import { COOKIE_SECRET } from "@config/env";
 import * as jwt from "jsonwebtoken";
+import * as signature from "cookie-signature";
+import {
+  TEST_CONSTANTS,
+  createSignedAccessTokenCookie,
+} from "../helpers/testHelpers";
 
-const verifiedUserEmail = "verified@example.com";
-const testPassword = "secret123";
+const { verifiedUserEmail, testPassword } = TEST_CONSTANTS;
 
 beforeEach(async () => {
   await clearDB();
@@ -22,11 +24,6 @@ beforeEach(async () => {
     isEmailVerified: true,
   });
 });
-
-const createSignedAccessTokenCookie = (accessToken: string): string => {
-  const signedToken = "s:" + signature.sign(accessToken, COOKIE_SECRET);
-  return `access_token=${signedToken}`;
-};
 
 describe("GET /api/v1/auth/me", () => {
   it("should return 401 if access token cookie is missing", async () => {

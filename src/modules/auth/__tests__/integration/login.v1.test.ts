@@ -2,10 +2,10 @@ import request from "supertest";
 import app from "@app";
 import { seedOneUserWithOrg } from "@tests/helpers/seed";
 import { clearDB } from "@tests/utils";
+import { TEST_CONSTANTS } from "../helpers/testHelpers";
 
-const verifiedUserEmail = "verified@example.com";
-const nonVerifiedUserEmail = "nonverified@example.com";
-const testPassword = "secret123";
+const { verifiedUserEmail, nonVerifiedUserEmail, testPassword } =
+  TEST_CONSTANTS;
 
 beforeEach(async () => {
   await clearDB();

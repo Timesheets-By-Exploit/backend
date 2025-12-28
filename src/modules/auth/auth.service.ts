@@ -241,6 +241,38 @@ const AuthService = {
       };
     }
   },
+  changePassword: async (
+    user: IUser,
+    currentPassword: string,
+    newPassword: string,
+  ): Promise<ISuccessPayload<{ message: string }> | IErrorPayload> => {
+    try {
+      const { compareHashedBcryptString } = await import("@utils/encryptors");
+      const isValidPassword = await compareHashedBcryptString(
+        currentPassword,
+        user.password,
+      );
+
+      if (!isValidPassword)
+        return {
+          success: false,
+          error: "Current password is incorrect",
+        };
+
+      user.password = newPassword;
+      await user.save();
+
+      return {
+        success: true,
+        data: { message: "Password changed successfully" },
+      };
+    } catch (err) {
+      return {
+        success: false,
+        error: (err as unknown as Error).message,
+      };
+    }
+  },
 };
 
 export default AuthService;

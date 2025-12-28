@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import {
+  changePasswordSchema,
   loginSchema,
   resendEmailVerificationCodeSchema,
   signupSchema,
@@ -72,5 +73,11 @@ export type GetMeOutput = {
 };
 
 export type LogoutOutput = {
+  message: string;
+};
+
+export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
+
+export type ChangePasswordOutput = {
   message: string;
 };
