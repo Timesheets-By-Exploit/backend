@@ -3,8 +3,10 @@ import validateResource from "@middlewares/validators";
 import authenticate from "@middlewares/authenticate";
 import {
   changePasswordSchema,
+  forgotPasswordSchema,
   loginSchema,
   resendEmailVerificationCodeSchema,
+  resetPasswordSchema,
   signupSchema,
   verifyEmailSchema,
 } from "../auth.validators";
@@ -17,6 +19,8 @@ import {
   getCurrentUser,
   logoutUser,
   changePassword,
+  forgotPassword,
+  resetPassword,
 } from "../auth.controller";
 
 const authRouter = Router();
@@ -45,6 +49,16 @@ authRouter.post(
   authenticate,
   validateResource(changePasswordSchema),
   changePassword,
+);
+authRouter.post(
+  "/forgot-password",
+  validateResource(forgotPasswordSchema),
+  forgotPassword,
+);
+authRouter.post(
+  "/reset-password",
+  validateResource(resetPasswordSchema),
+  resetPassword,
 );
 
 export default authRouter;

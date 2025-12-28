@@ -3,9 +3,11 @@ import AuthService from "./auth.service";
 import {
   ChangePasswordOutput,
   EmailVerificationOutput,
+  ForgotPasswordOutput,
   GetMeOutput,
   LoginOutput,
   LogoutOutput,
+  ResetPasswordOutput,
   SendEmailVerificationCodeOutput,
   SignupInput,
   SignupOutput,
@@ -197,5 +199,41 @@ export const changePassword = routeTryCatcher(
       success: true,
       data: (result as ISuccessPayload<ChangePasswordOutput>).data,
     } as ISuccessPayload<ChangePasswordOutput>);
+  },
+);
+
+export const forgotPassword = routeTryCatcher(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const result = await AuthService.sendPasswordResetEmail(req.body.email);
+    if (!result.success)
+      return next(
+        AppError.badRequest(
+          (result as IErrorPayload).error ||
+            "Failed to send password reset email",
+        ),
+      );
+    return res
+      .status(200)
+      .json(result as ISuccessPayload<ForgotPasswordOutput>);
+  },
+);
+
+export const resetPassword = routeTryCatcher(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const result = await AuthService.resetPassword(
+      req.body.email,
+      req.body.passwordResetCode,
+      req.body.newPassword,
+    );
+    if (!result.success)
+      return next(
+        AppError.badRequest(
+          (result as IErrorPayload).error || "Password reset failed",
+        ),
+      );
+    return res.json({
+      success: true,
+      data: (result as ISuccessPayload<ResetPasswordOutput>).data,
+    } as ISuccessPayload<ResetPasswordOutput>);
   },
 );
