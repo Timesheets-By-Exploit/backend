@@ -27,3 +27,22 @@ export type CreateOrganizationOutput = {
   organizationId: string;
   membershipId: string;
 };
+
+export type GetOrganizationOutput = {
+  organization: {
+    id: string;
+    name: string;
+    slug: string;
+    domain?: string;
+    description?: string;
+    status: string;
+    size: number;
+    settings: {
+      timezone: string;
+      workHours: number;
+    };
+    createdAt: Date;
+    updatedAt: Date;
+  };
+  role: string;
+};

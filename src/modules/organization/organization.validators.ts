@@ -9,3 +9,7 @@ export const createOrganizationSchema = z.object({
   domain: z.string().optional(),
   description: z.string().optional(),
 });
+
+export const getOrganizationSchema = z.object({
+  orgId: z.string().min(1, "Organization ID is required"),
+});

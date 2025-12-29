@@ -46,7 +46,6 @@ describe("Password Reset Code Logic", () => {
     });
     const code = user.generatePasswordResetCode();
     await user.save();
-    console.log(user.passwordResetCodeExpiry, code);
     const isCorrectCode = user.verifyPasswordResetCode(code);
     expect(isCorrectCode).toBe(true);
   });

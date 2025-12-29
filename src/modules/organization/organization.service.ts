@@ -82,6 +82,52 @@ const OrganizationService = {
       owner: new mongoose.Types.ObjectId(ownerId),
     });
   },
+
+  getOrganizationWithUserRole: async (
+    orgId: string,
+    userId: string,
+  ): Promise<
+    | ISuccessPayload<{
+        organization: IOrganization;
+        role: string;
+      }>
+    | IErrorPayload
+  > => {
+    try {
+      const organization = await OrganizationModel.findById(orgId);
+      if (!organization) {
+        return {
+          success: false,
+          error: "Organization not found",
+        };
+      }
+
+      const membership = await MembershipService.getMembershipByUserAndOrg(
+        userId,
+        orgId,
+      );
+
+      if (!membership) {
+        return {
+          success: false,
+          error: "User is not a member of this organization",
+        };
+      }
+
+      return {
+        success: true,
+        data: {
+          organization,
+          role: membership.role,
+        },
+      };
+    } catch (err) {
+      return {
+        success: false,
+        error: (err as Error).message,
+      };
+    }
+  },
 };
 
 export default OrganizationService;

@@ -46,6 +46,16 @@ const MembershipService = {
       userId: new mongoose.Types.ObjectId(userId),
     });
   },
+
+  getMembershipByUserAndOrg: async (
+    userId: string,
+    orgId: string,
+  ): Promise<IMembership | null> => {
+    return await MembershipModel.findOne({
+      userId: new mongoose.Types.ObjectId(userId),
+      orgId: new mongoose.Types.ObjectId(orgId),
+    });
+  },
 };
 
 export default MembershipService;
