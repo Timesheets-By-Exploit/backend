@@ -4,6 +4,7 @@ import {
   CreateOrganizationInput,
   CreateOrganizationOutput,
   GetOrganizationOutput,
+  GetOrganizationMembersOutput,
   IOrganization,
 } from "./organization.types";
 import AppError from "@utils/AppError";
@@ -82,6 +83,46 @@ export const getOrganization = routeTryCatcher(
     return res.status(200).json({
       success: true,
       message: "Organization retrieved successfully",
+      data: output,
+    });
+  },
+);
+
+export const getOrganizationMembers = routeTryCatcher(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user as IUser;
+    if (!user) return next(AppError.unauthorized("User not found"));
+
+    const result = await OrganizationService.getOrganizationMembers(
+      user._id.toString(),
+    );
+
+    if ((result as IErrorPayload).error) {
+      const error = (result as IErrorPayload).error;
+      if (error === "User does not have an organization") {
+        return next(AppError.notFound(error));
+      }
+      return next(AppError.badRequest(error));
+    }
+
+    const output: GetOrganizationMembersOutput = (
+      result as ISuccessPayload<{
+        members: Array<{
+          membershipId: string;
+          userId: string;
+          firstName: string;
+          lastName: string;
+          email: string;
+          role: string;
+          status: string;
+          joinedAt: Date;
+        }>;
+      }>
+    ).data;
+
+    return res.status(200).json({
+      success: true,
+      message: "Organization members retrieved successfully",
       data: output,
     });
   },

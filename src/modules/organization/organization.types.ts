@@ -46,3 +46,18 @@ export type GetOrganizationOutput = {
   };
   role: string;
 };
+
+export type OrganizationMember = {
+  membershipId: string;
+  userId: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: string;
+  status: string;
+  joinedAt: Date;
+};
+
+export type GetOrganizationMembersOutput = {
+  members: OrganizationMember[];
+};

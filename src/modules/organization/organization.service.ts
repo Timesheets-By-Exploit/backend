@@ -113,7 +113,6 @@ const OrganizationService = {
         };
       }
 
-      // Get the first (and only) membership
       const membership = memberships[0];
       if (!membership) {
         return {
@@ -137,6 +136,70 @@ const OrganizationService = {
           organization,
           role: membership.role,
         },
+      };
+    } catch (err) {
+      return {
+        success: false,
+        error: (err as Error).message,
+      };
+    }
+  },
+
+  getOrganizationMembers: async (
+    userId: string,
+  ): Promise<
+    | ISuccessPayload<{
+        members: Array<{
+          membershipId: string;
+          userId: string;
+          firstName: string;
+          lastName: string;
+          email: string;
+          role: string;
+          status: string;
+          joinedAt: Date;
+        }>;
+      }>
+    | IErrorPayload
+  > => {
+    try {
+      const orgResult = await OrganizationService.getUserOrganization(userId);
+
+      if (!orgResult.success) {
+        return {
+          success: false,
+          error: "User does not have an organization",
+        };
+      }
+
+      const organization = (
+        orgResult as {
+          success: true;
+          data: { organization: IOrganization; role: string };
+        }
+      ).data.organization;
+
+      const memberships = await MembershipService.getMembershipsByOrg(
+        organization._id.toString(),
+      );
+
+      const members = memberships.map((membership) => {
+        const user = membership.userId as unknown as IUser;
+        return {
+          membershipId: membership._id.toString(),
+          userId: user._id.toString(),
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          role: membership.role,
+          status: membership.status,
+          joinedAt: membership.createdAt,
+        };
+      });
+
+      return {
+        success: true,
+        data: { members },
       };
     } catch (err) {
       return {

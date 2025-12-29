@@ -56,6 +56,14 @@ const MembershipService = {
       orgId: new mongoose.Types.ObjectId(orgId),
     });
   },
+
+  getMembershipsByOrg: async (orgId: string): Promise<IMembership[]> => {
+    return await MembershipModel.find({
+      orgId: new mongoose.Types.ObjectId(orgId),
+    })
+      .populate("userId", "firstName lastName email")
+      .sort({ createdAt: 1 });
+  },
 };
 
 export default MembershipService;
