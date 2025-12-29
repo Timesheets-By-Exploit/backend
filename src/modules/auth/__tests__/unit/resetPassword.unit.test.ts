@@ -1,24 +1,22 @@
-import UserModel from "@modules/user/user.model";
+import UserService from "@modules/user/user.service";
 import { UserFactory } from "@tests/factories/user.factory";
 import { convertTimeToMilliseconds } from "@utils/index";
 
 describe("Password Reset Code Logic", () => {
   it("successfully generates a hashed password reset code", async () => {
-    const user = new UserModel({
+    const user = await UserService.createUser({
       ...UserFactory.generate(),
-      role: "owner",
     });
     const code = user.generatePasswordResetCode();
-    await user.save();
+    await user.save(); // Save to trigger pre-save hook that sets expiry
     expect(code).toHaveLength(6);
     expect(code).not.toBe(user.passwordResetCode);
     expect(user.passwordResetCodeExpiry).toBeDefined();
   });
 
   it("fails verification if code is wrong", async () => {
-    const user = new UserModel({
+    const user = await UserService.createUser({
       ...UserFactory.generate(),
-      role: "owner",
     });
     const code = user.generatePasswordResetCode();
     await user.save();
@@ -29,9 +27,8 @@ describe("Password Reset Code Logic", () => {
   });
 
   it("fails verification if code is expired", async () => {
-    const user = new UserModel({
+    const user = await UserService.createUser({
       ...UserFactory.generate(),
-      role: "owner",
     });
     const code = user.generatePasswordResetCode();
     await user.save();
@@ -44,20 +41,19 @@ describe("Password Reset Code Logic", () => {
   });
 
   it("successfully verifies code with correct code", async () => {
-    const user = new UserModel({
+    const user = await UserService.createUser({
       ...UserFactory.generate(),
-      role: "owner",
     });
     const code = user.generatePasswordResetCode();
     await user.save();
+    console.log(user.passwordResetCodeExpiry, code);
     const isCorrectCode = user.verifyPasswordResetCode(code);
     expect(isCorrectCode).toBe(true);
   });
 
   it("clears password reset data after clearing", async () => {
-    const user = new UserModel({
+    const user = await UserService.createUser({
       ...UserFactory.generate(),
-      role: "owner",
     });
     user.generatePasswordResetCode();
     await user.save();

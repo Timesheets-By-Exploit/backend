@@ -21,8 +21,8 @@ const organizationSchema = new mongoose.Schema<IOrganization>(
     description: { type: String, trim: true },
     status: {
       type: String,
-      enum: ["active", "inactive"],
-      default: "active",
+      enum: ["ACTIVE", "INACTIVE"],
+      default: "ACTIVE",
     },
     size: {
       type: Number,

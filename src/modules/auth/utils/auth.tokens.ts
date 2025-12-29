@@ -6,9 +6,9 @@ import { hashWithCrypto } from "@utils/encryptors";
 import { IUser } from "@modules/user/user.types";
 import { AccessPayload } from "../auth.types";
 import { DEFAULT_REFRESH_DAYS } from "@config/constants";
-import UserModel from "@modules/user/user.model";
 import { convertTimeToMilliseconds } from "@utils/index";
 import { RefreshTokenModel } from "../refreshToken.model";
+import UserService from "@modules/user/user.service";
 
 export function verifyAccessToken(token: string): AccessPayload {
   return jwt.verify(token, JWT_SECRET) as AccessPayload;
@@ -75,7 +75,7 @@ export async function rotateRefreshToken(
     });
     throw new Error("Refresh token expired");
   }
-  const user = await UserModel.findById(existing.user);
+  const user = await UserService.getUserById(existing.user.toString());
   if (!user) throw new Error("User not found!");
   const rawRefreshToken = generateRandomTokenWithCrypto(
     Number(process.env.REFRESH_TOKEN_BYTES || 64),

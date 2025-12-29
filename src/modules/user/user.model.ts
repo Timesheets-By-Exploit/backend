@@ -9,18 +9,6 @@ const userSchema = new Schema<IUser>(
     lastName: { type: String, required: true, trim: true },
     email: { type: String, required: true, unique: true, lowercase: true },
     password: { type: String, required: true },
-    role: {
-      type: String,
-      enum: ["owner", "admin", "member", "viewer"],
-      default: "member",
-    },
-    organization: {
-      type: Schema.Types.ObjectId,
-      ref: "Organization",
-      required: function () {
-        return this.role === "member";
-      },
-    },
     isEmailVerified: { type: Boolean, default: false },
     emailVerificationCode: { type: String, default: null },
     emailVerificationCodeExpiry: { type: Date, default: null },

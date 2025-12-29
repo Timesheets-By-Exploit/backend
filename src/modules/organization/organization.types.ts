@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
+import { z } from "zod";
+import { createOrganizationSchema } from "./organization.validators";
 
-type Status = "active" | "inactive";
+type Status = "ACTIVE" | "INACTIVE";
 
 export interface IOrganization extends mongoose.Document {
   _id: mongoose.Types.ObjectId;
@@ -18,3 +20,10 @@ export interface IOrganization extends mongoose.Document {
     workHours: number;
   };
 }
+
+export type CreateOrganizationInput = z.infer<typeof createOrganizationSchema>;
+
+export type CreateOrganizationOutput = {
+  organizationId: string;
+  membershipId: string;
+};

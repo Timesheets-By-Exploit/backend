@@ -2,7 +2,7 @@ import request from "supertest";
 import app from "@app";
 import { UserFactory } from "@tests/factories/user.factory";
 import { sendEmailWithTemplate } from "@services/email.service";
-import UserModel from "@modules/user/user.model";
+import UserService from "@modules/user/user.service";
 import { convertTimeToMilliseconds } from "@utils/index";
 import { clearDB } from "@tests/utils";
 
@@ -45,7 +45,7 @@ describe("Email Verification", () => {
 
     await request(app).post("/api/v1/auth/signup").send(user);
 
-    const userInDb = await UserModel.findOne({ email: user.email });
+    const userInDb = await UserService.getUserByEmail(user.email);
     if (userInDb) {
       userInDb.emailVerificationCodeExpiry = new Date(
         Date.now() - convertTimeToMilliseconds(1, "min"),
