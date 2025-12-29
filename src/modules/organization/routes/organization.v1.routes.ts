@@ -1,10 +1,7 @@
 import { Router } from "express";
 import validateResource from "@middlewares/validators";
 import authenticate from "@middlewares/authenticate";
-import {
-  createOrganizationSchema,
-  getOrganizationSchema,
-} from "../organization.validators";
+import { createOrganizationSchema } from "../organization.validators";
 import {
   createOrganization,
   getOrganization,
@@ -19,11 +16,6 @@ organizationRouter.post(
   createOrganization,
 );
 
-organizationRouter.get(
-  "/",
-  authenticate,
-  validateResource(getOrganizationSchema, "query"),
-  getOrganization,
-);
+organizationRouter.get("/", authenticate, getOrganization);
 
 export default organizationRouter;

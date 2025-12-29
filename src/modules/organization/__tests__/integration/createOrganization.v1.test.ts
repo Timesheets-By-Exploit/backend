@@ -294,8 +294,8 @@ describe("POST /api/v1/org", () => {
       expect(membership?.userId.toString()).toBe(user._id.toString());
     });
 
-    it("should generate unique slug for organization", async () => {
-      const res1 = await request(app)
+    it("should generate slug for organization", async () => {
+      const res = await request(app)
         .post("/api/v1/org")
         .set("Cookie", [cookie])
         .send({
@@ -303,34 +303,18 @@ describe("POST /api/v1/org", () => {
           size: 10,
         });
 
-      expect(res1.status).toBe(201);
+      expect(res.status).toBe(201);
 
-      const org1 = await OrganizationService.getOrganizationById(
-        res1.body.data.organizationId,
+      const org = await OrganizationService.getOrganizationById(
+        res.body.data.organizationId,
       );
-      const slug1 = org1?.slug;
+      const slug = org?.slug;
 
-      const res2 = await request(app)
-        .post("/api/v1/org")
-        .set("Cookie", [cookie])
-        .send({
-          name: "Test Organization",
-          size: 10,
-        });
-
-      expect(res2.status).toBe(201);
-
-      const org2 = await OrganizationService.getOrganizationById(
-        res2.body.data.organizationId,
-      );
-      const slug2 = org2?.slug;
-
-      expect(slug1).toBeDefined();
-      expect(slug2).toBeDefined();
-      expect(slug1).not.toBe(slug2);
+      expect(slug).toBeDefined();
+      expect(slug).toBe("test-organization");
     });
 
-    it("should allow user to create multiple organizations", async () => {
+    it("should return 409 if user already has an organization", async () => {
       const res1 = await request(app)
         .post("/api/v1/org")
         .set("Cookie", [cookie])
@@ -338,6 +322,8 @@ describe("POST /api/v1/org", () => {
           name: "First Organization",
           size: 10,
         });
+
+      expect(res1.status).toBe(201);
 
       const res2 = await request(app)
         .post("/api/v1/org")
@@ -347,43 +333,9 @@ describe("POST /api/v1/org", () => {
           size: 20,
         });
 
-      expect(res1.status).toBe(201);
-      expect(res2.status).toBe(201);
-
-      const organizations = await OrganizationService.getOrganizationsByOwner(
-        user._id.toString(),
-      );
-
-      expect(organizations).toHaveLength(2);
-    });
-
-    it("should create membership for each organization", async () => {
-      const res1 = await request(app)
-        .post("/api/v1/org")
-        .set("Cookie", [cookie])
-        .send({
-          name: "First Organization",
-          size: 10,
-        });
-
-      const res2 = await request(app)
-        .post("/api/v1/org")
-        .set("Cookie", [cookie])
-        .send({
-          name: "Second Organization",
-          size: 20,
-        });
-
-      expect(res1.status).toBe(201);
-      expect(res2.status).toBe(201);
-
-      const memberships = await MembershipService.getMembershipsByUser(
-        user._id.toString(),
-      );
-
-      expect(memberships).toHaveLength(2);
-      expect(memberships[0]?.role).toBe("OWNER");
-      expect(memberships[1]?.role).toBe("OWNER");
+      expect(res2.status).toBe(409);
+      expect(res2.body.success).toBe(false);
+      expect(res2.body.error).toBe("User already has an organization");
     });
   });
 

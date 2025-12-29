@@ -14,6 +14,17 @@ const OrganizationService = {
     user: IUser,
     input: CreateOrganizationInput,
   ): Promise<ISuccessPayload<CreateOrganizationOutput> | IErrorPayload> => {
+    const existingMembership = await MembershipService.getMembershipsByUser(
+      user._id.toString(),
+    );
+
+    if (existingMembership.length > 0) {
+      return {
+        success: false,
+        error: "User already has an organization",
+      };
+    }
+
     const session = await mongoose.startSession();
     session.startTransaction();
 
@@ -83,8 +94,7 @@ const OrganizationService = {
     });
   },
 
-  getOrganizationWithUserRole: async (
-    orgId: string,
+  getUserOrganization: async (
     userId: string,
   ): Promise<
     | ISuccessPayload<{
@@ -94,23 +104,30 @@ const OrganizationService = {
     | IErrorPayload
   > => {
     try {
-      const organization = await OrganizationModel.findById(orgId);
+      const memberships = await MembershipService.getMembershipsByUser(userId);
+
+      if (memberships.length === 0) {
+        return {
+          success: false,
+          error: "User does not have an organization",
+        };
+      }
+
+      // Get the first (and only) membership
+      const membership = memberships[0];
+      if (!membership) {
+        return {
+          success: false,
+          error: "User does not have an organization",
+        };
+      }
+
+      const organization = await OrganizationModel.findById(membership.orgId);
+
       if (!organization) {
         return {
           success: false,
           error: "Organization not found",
-        };
-      }
-
-      const membership = await MembershipService.getMembershipByUserAndOrg(
-        userId,
-        orgId,
-      );
-
-      if (!membership) {
-        return {
-          success: false,
-          error: "User is not a member of this organization",
         };
       }
 

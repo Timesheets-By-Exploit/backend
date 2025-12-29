@@ -12,24 +12,20 @@ export type OrganizationApiSpec = Tspec.DefineApiSpec<{
   paths: {
     "/": {
       post: {
-        summary: "Create a new organization";
+        summary: "Create a new organization (one per user)";
         body: CreateOrganizationInput;
         responses: {
           201: ISuccessPayload<CreateOrganizationOutput>;
           400: IErrorPayload;
           401: IErrorPayload;
+          409: IErrorPayload;
         };
       };
       get: {
-        summary: "Get organization with caller's role";
-        query: {
-          orgId: string;
-        };
+        summary: "Get user's organization with caller's role";
         responses: {
           200: ISuccessPayload<GetOrganizationOutput>;
-          400: IErrorPayload;
           401: IErrorPayload;
-          403: IErrorPayload;
           404: IErrorPayload;
         };
       };

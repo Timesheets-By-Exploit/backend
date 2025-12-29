@@ -20,12 +20,13 @@ export const createOrganization = routeTryCatcher(
       input,
     );
 
-    if ((result as IErrorPayload).error)
-      return next(
-        AppError.badRequest(
-          (result as IErrorPayload).error || "Organization creation failed",
-        ),
-      );
+    if ((result as IErrorPayload).error) {
+      const error = (result as IErrorPayload).error;
+      if (error === "User already has an organization") {
+        return next(AppError.conflict(error));
+      }
+      return next(AppError.badRequest(error || "Organization creation failed"));
+    }
 
     return res.status(201).json({
       success: true,
@@ -38,24 +39,19 @@ export const createOrganization = routeTryCatcher(
 export const getOrganization = routeTryCatcher(
   async (req: Request, res: Response, next: NextFunction) => {
     const user = req.user as IUser;
-    if (!user) return next(AppError.unauthorized("User not found"));
-
-    const orgId = req.query.orgId as string;
-    if (!orgId) {
-      return next(AppError.badRequest("Organization ID is required"));
-    }
-
-    const result = await OrganizationService.getOrganizationWithUserRole(
-      orgId,
+    const result = await OrganizationService.getUserOrganization(
       user._id.toString(),
     );
 
     if ((result as IErrorPayload).error) {
       const error = (result as IErrorPayload).error;
+      if (error === "User does not have an organization") {
+        return next(AppError.notFound(error));
+      }
       if (error === "Organization not found") {
         return next(AppError.notFound(error));
       }
-      return next(AppError.forbidden(error));
+      return next(AppError.badRequest(error));
     }
 
     const { organization, role } = (

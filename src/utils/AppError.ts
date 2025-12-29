@@ -38,6 +38,10 @@ export default class AppError extends Error {
     return new AppError(message, 404, details);
   }
 
+  static conflict(message = "Conflict", details?: string) {
+    return new AppError(message, 409, details);
+  }
+
   static internal(message = "Internal Server Error", details?: string) {
     return new AppError(message, 500, details, false);
   }
