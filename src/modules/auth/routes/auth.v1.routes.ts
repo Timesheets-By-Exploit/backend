@@ -11,7 +11,7 @@ import {
   verifyEmailSchema,
 } from "../auth.validators";
 import {
-  signupOrganizationOwner,
+  signup,
   verifyEmailVerificationCode,
   resendEmailVerificationCode,
   loginUser,
@@ -25,11 +25,7 @@ import {
 
 const authRouter = Router();
 
-authRouter.post(
-  "/signup",
-  validateResource(signupSchema),
-  signupOrganizationOwner,
-);
+authRouter.post("/signup", validateResource(signupSchema), signup);
 authRouter.post(
   "/verify-email",
   validateResource(verifyEmailSchema),

@@ -20,11 +20,11 @@ import { compareHashedBcryptString } from "@utils/encryptors";
 import { serializeUser } from "@modules/user/user.utils";
 import { setAuthCookies, clearAuthCookies } from "./utils/auth.cookies";
 
-export const signupOrganizationOwner = routeTryCatcher(
+export const signup = routeTryCatcher(
   async (req: Request, res: Response, next: NextFunction) => {
     const input: SignupInput = req.body;
 
-    const result = await AuthService.signupOwner(input);
+    const result = await AuthService.signup(input);
 
     if ((result as IErrorPayload).error)
       return next(
