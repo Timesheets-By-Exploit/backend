@@ -1,13 +1,21 @@
 import mongoose from "mongoose";
 import OrganizationModel from "./organization.model";
 import MembershipService from "@modules/membership/membership.service";
+import UserService from "@modules/user/user.service";
 import { IUser } from "@modules/user/user.types";
 import {
   CreateOrganizationInput,
   CreateOrganizationOutput,
   IOrganization,
+  InviteMemberInput,
+  InviteMemberOutput,
+  GetUserOrganizationOutput,
+  PendingMembershipData,
 } from "./organization.types";
 import { ISuccessPayload, IErrorPayload } from "src/types";
+import { generateRandomTokenWithCrypto } from "@utils/generators";
+import { sendInvitationEmail } from "./utils/invitationEmail";
+import { IMembership } from "@modules/membership/membership.types";
 
 const OrganizationService = {
   createOrganization: async (
@@ -96,13 +104,7 @@ const OrganizationService = {
 
   getUserOrganization: async (
     userId: string,
-  ): Promise<
-    | ISuccessPayload<{
-        organization: IOrganization;
-        role: string;
-      }>
-    | IErrorPayload
-  > => {
+  ): Promise<ISuccessPayload<GetUserOrganizationOutput> | IErrorPayload> => {
     try {
       const memberships = await MembershipService.getMembershipsByUser(userId);
 
@@ -114,21 +116,19 @@ const OrganizationService = {
       }
 
       const membership = memberships[0];
-      if (!membership) {
+      if (!membership)
         return {
           success: false,
           error: "User does not have an organization",
         };
-      }
 
       const organization = await OrganizationModel.findById(membership.orgId);
 
-      if (!organization) {
+      if (!organization)
         return {
           success: false,
           error: "Organization not found",
         };
-      }
 
       return {
         success: true,
@@ -173,10 +173,7 @@ const OrganizationService = {
       }
 
       const organization = (
-        orgResult as {
-          success: true;
-          data: { organization: IOrganization; role: string };
-        }
+        orgResult as ISuccessPayload<GetUserOrganizationOutput>
       ).data.organization;
 
       const memberships = await MembershipService.getMembershipsByOrg(
@@ -200,6 +197,123 @@ const OrganizationService = {
       return {
         success: true,
         data: { members },
+      };
+    } catch (err) {
+      return {
+        success: false,
+        error: (err as Error).message,
+      };
+    }
+  },
+
+  inviteMember: async (
+    inviter: IUser,
+    input: InviteMemberInput,
+  ): Promise<ISuccessPayload<InviteMemberOutput> | IErrorPayload> => {
+    try {
+      const memberships = await MembershipService.getMembershipsByUser(
+        inviter._id.toString(),
+      );
+
+      if (memberships.length === 0)
+        return {
+          success: false,
+          error: "User does not have an organization",
+        };
+
+      const inviterMembership = memberships[0];
+      const organization = await OrganizationService.getOrganizationById(
+        inviterMembership?.orgId?.toString() || "",
+      );
+
+      if (!organization)
+        return {
+          success: false,
+          error: "Organization not found",
+        };
+
+      const existingUser = await UserService.getUserByEmail(input.email);
+
+      let existingMembership: IMembership | null = null;
+      if (existingUser) {
+        existingMembership = await MembershipService.getMembershipByUserAndOrg(
+          existingUser._id.toString(),
+          organization._id.toString(),
+        );
+      }
+
+      if (!existingMembership) {
+        existingMembership = await MembershipService.getMembershipByEmailAndOrg(
+          input.email,
+          organization._id.toString(),
+        );
+      }
+
+      if (existingMembership) {
+        if (existingMembership.status !== "PENDING")
+          return {
+            success: false,
+            error: "User is already a member of this organization",
+          };
+        return {
+          success: false,
+          error: "An invitation has already been sent to this email",
+        };
+      }
+
+      const invitationToken = generateRandomTokenWithCrypto(32);
+
+      const membershipData: PendingMembershipData = {
+        orgId: organization._id.toString(),
+        role: input.role,
+        status: "PENDING",
+        invitationToken,
+        invitedBy: inviter._id.toString(),
+      };
+
+      if (existingUser) {
+        membershipData.userId = existingUser._id.toString();
+      } else {
+        membershipData.email = input.email;
+      }
+
+      const membershipResult =
+        await MembershipService.createMembership(membershipData);
+
+      if (!membershipResult.success) {
+        return {
+          success: false,
+          error:
+            (membershipResult as IErrorPayload).error ||
+            "Failed to create membership invitation",
+        };
+      }
+
+      const membershipId = (
+        membershipResult as ISuccessPayload<{ membershipId: string }>
+      ).data.membershipId;
+
+      const owner = await UserService.getUserById(
+        organization.owner.toString(),
+      );
+      const ownersName = owner
+        ? `${owner.firstName} ${owner.lastName}`
+        : "Organization Owner";
+
+      const emailSentResponse = await sendInvitationEmail({
+        email: input.email,
+        role: input.role,
+        organization,
+        invitationToken,
+        ownersName,
+      });
+
+      return {
+        success: true,
+        data: {
+          invitationId: membershipId,
+          emailSent: emailSentResponse.emailSent || false,
+        },
       };
     } catch (err) {
       return {

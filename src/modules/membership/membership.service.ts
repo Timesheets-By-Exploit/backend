@@ -13,12 +13,34 @@ const MembershipService = {
     session?: mongoose.ClientSession,
   ): Promise<ISuccessPayload<CreateMembershipOutput> | IErrorPayload> => {
     try {
-      const membership = new MembershipModel({
+      const membershipData: {
+        orgId: string;
+        userId?: string;
+        email?: string;
+        role: string;
+        status: string;
+        invitationToken?: string;
+        invitedBy?: string;
+      } = {
         orgId: input.orgId,
-        userId: input.userId,
         role: input.role,
         status: input.status || "ACTIVE",
-      });
+      };
+
+      if (input.userId) {
+        membershipData.userId = input.userId;
+      } else if (input.email) {
+        membershipData.email = input.email;
+      }
+
+      if (input.invitationToken) {
+        membershipData.invitationToken = input.invitationToken;
+      }
+      if (input.invitedBy) {
+        membershipData.invitedBy = input.invitedBy;
+      }
+
+      const membership = new MembershipModel(membershipData);
 
       if (session) await membership.save({ session });
       else await membership.save();
@@ -63,6 +85,15 @@ const MembershipService = {
     })
       .populate("userId", "firstName lastName email")
       .sort({ createdAt: 1 });
+  },
+  getMembershipByEmailAndOrg: async (
+    email: string,
+    orgId: string,
+  ): Promise<IMembership | null> => {
+    return await MembershipModel.findOne({
+      email,
+      orgId: new mongoose.Types.ObjectId(orgId),
+    });
   },
 };
 

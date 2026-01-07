@@ -16,6 +16,8 @@ const envSchema = z.object({
   COOKIE_SECRET: z.string(),
   EMAIL_VERIFICATION_TEMPLATE_KEY: z.string(),
   PASSWORD_RESET_TEMPLATE_KEY: z.string(),
+  INVITATION_TEMPLATE_KEY: z.string(),
+  FRONTEND_BASE_URL: z.string().url(),
 });
 
 const isTest = process.env.NODE_ENV === "test";
@@ -37,6 +39,8 @@ const env = isTest
         COOKIE_SECRET: "testsecret",
         EMAIL_VERIFICATION_TEMPLATE_KEY: "",
         PASSWORD_RESET_TEMPLATE_KEY: "",
+        INVITATION_TEMPLATE_KEY: "",
+        FRONTEND_BASE_URL: "",
       },
       error: envSchema.safeParse(process.env).error,
     }
@@ -61,4 +65,6 @@ export const {
   COOKIE_SECRET,
   EMAIL_VERIFICATION_TEMPLATE_KEY,
   PASSWORD_RESET_TEMPLATE_KEY,
+  INVITATION_TEMPLATE_KEY,
+  FRONTEND_BASE_URL,
 } = env.data;

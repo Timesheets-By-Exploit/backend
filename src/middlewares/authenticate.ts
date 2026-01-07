@@ -24,6 +24,7 @@ const authenticate = async (
     }
 
     req.user = user;
+
     next();
   } catch (err) {
     return next(

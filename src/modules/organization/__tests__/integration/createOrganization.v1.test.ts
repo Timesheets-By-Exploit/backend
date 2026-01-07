@@ -128,18 +128,19 @@ describe("POST /api/v1/org", () => {
         .post("/api/v1/org")
         .set("Cookie", [cookie])
         .send({
-          name: "A".repeat(51),
+          name: "A".repeat(101),
           size: 10,
         });
 
       expect(res.status).toBe(400);
       expect(res.body.success).toBe(false);
-      // Validation errors may be in error field or nested in errors
       expect(
-        res.body.error?.toLowerCase().includes("at most 50 characters") ||
+        res.body.error
+          ?.toLowerCase()
+          .includes("must not exceed 100 characters") ||
           JSON.stringify(res.body)
             .toLowerCase()
-            .includes("at most 50 characters"),
+            .includes("must not exceed 100 characters"),
       ).toBe(true);
     });
 
@@ -291,7 +292,7 @@ describe("POST /api/v1/org", () => {
       expect(membership?.role).toBe("OWNER");
       expect(membership?.status).toBe("ACTIVE");
       expect(membership?.orgId.toString()).toBe(res.body.data.organizationId);
-      expect(membership?.userId.toString()).toBe(user._id.toString());
+      expect(membership?.userId?.toString()).toBe(user._id.toString());
     });
 
     it("should generate slug for organization", async () => {
@@ -384,7 +385,7 @@ describe("POST /api/v1/org", () => {
       expect(organization).toBeDefined();
       expect(membership).toBeDefined();
       expect(membership?.orgId.toString()).toBe(organization?._id.toString());
-      expect(membership?.userId.toString()).toBe(user._id.toString());
+      expect(membership?.userId?.toString()).toBe(user._id.toString());
     });
   });
 });

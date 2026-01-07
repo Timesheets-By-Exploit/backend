@@ -37,7 +37,7 @@ describe("Email Verification Code Logic", () => {
       ...UserFactory.generate(),
     });
     const code = user.generateEmailVerificationCode();
-    await user.save(); // Save to trigger pre-save hook that sets expiry
+    await user.save();
     const isCorrectCode = user.verifyEmailVerificationCode(code);
     expect(isCorrectCode).toBe(true);
     expect(user.isEmailVerified).toBe(true);
@@ -48,7 +48,7 @@ describe("Email Verification Code Logic", () => {
       ...UserFactory.generate(),
     });
     user.generateEmailVerificationCode();
-    await user.save(); // Save to trigger pre-save hook that sets expiry
+    await user.save();
     expect(user.emailVerificationCode).toBeTruthy();
     expect(user.emailVerificationCodeExpiry).toBeTruthy();
 

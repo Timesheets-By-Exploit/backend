@@ -109,7 +109,7 @@ describe("GET /api/v1/org/members", () => {
       await MembershipService.createMembership({
         orgId: organizationId,
         userId: admin._id.toString(),
-        role: "ADMIN",
+        role: "MANAGER",
         status: "ACTIVE",
       });
       const memberData = UserFactory.generate({
@@ -200,7 +200,7 @@ describe("GET /api/v1/org/members", () => {
       expect(res.body.success).toBe(true);
     });
 
-    it("should return 200 if user is ADMIN", async () => {
+    it("should return 200 if user is MANAGER", async () => {
       const accessToken = generateAccessToken({
         id: admin._id.toString(),
         email: admin.email,
@@ -305,7 +305,7 @@ describe("GET /api/v1/org/members", () => {
       await MembershipService.createMembership({
         orgId: organizationId,
         userId: admin._id.toString(),
-        role: "ADMIN",
+        role: "MANAGER",
         status: "ACTIVE",
       });
 
@@ -420,7 +420,7 @@ describe("GET /api/v1/org/members", () => {
       );
 
       expect(ownerMember.role).toBe("OWNER");
-      expect(adminMember.role).toBe("ADMIN");
+      expect(adminMember.role).toBe("MANAGER");
       expect(memberMember.role).toBe("MEMBER");
     });
   });

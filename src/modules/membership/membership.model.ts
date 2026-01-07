@@ -11,11 +11,19 @@ const membershipSchema = new Schema<IMembership>(
     userId: {
       type: Schema.Types.ObjectId,
       ref: "User",
-      required: true,
+      required: function (this: IMembership) {
+        return this.status !== "PENDING";
+      },
+    },
+    email: {
+      type: String,
+      required: function (this: IMembership) {
+        return this.status === "PENDING" && !this.userId;
+      },
     },
     role: {
       type: String,
-      enum: ["OWNER", "ADMIN", "MEMBER", "VIEWER"],
+      enum: ["OWNER", "MANAGER", "MEMBER", "VIEWER"],
       required: true,
     },
     status: {
@@ -23,11 +31,18 @@ const membershipSchema = new Schema<IMembership>(
       enum: ["ACTIVE", "DISABLED", "PENDING"],
       default: "ACTIVE",
     },
+    invitationToken: {
+      type: String,
+      default: null,
+    },
+    invitedBy: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
   },
   { timestamps: true },
 );
-
-membershipSchema.index({ orgId: 1, userId: 1 }, { unique: true });
 
 const MembershipModel = mongoose.model<IMembership>(
   "Membership",

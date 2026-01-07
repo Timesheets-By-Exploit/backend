@@ -5,7 +5,8 @@ import {
   CreateOrganizationOutput,
   GetOrganizationOutput,
   GetOrganizationMembersOutput,
-  IOrganization,
+  InviteMemberOutput,
+  GetUserOrganizationOutput,
 } from "./organization.types";
 import AppError from "@utils/AppError";
 import { IErrorPayload, ISuccessPayload } from "src/types";
@@ -56,10 +57,7 @@ export const getOrganization = routeTryCatcher(
     }
 
     const { organization, role } = (
-      result as ISuccessPayload<{
-        organization: IOrganization;
-        role: string;
-      }>
+      result as ISuccessPayload<GetUserOrganizationOutput>
     ).data;
 
     const output: GetOrganizationOutput = {
@@ -106,23 +104,37 @@ export const getOrganizationMembers = routeTryCatcher(
     }
 
     const output: GetOrganizationMembersOutput = (
-      result as ISuccessPayload<{
-        members: Array<{
-          membershipId: string;
-          userId: string;
-          firstName: string;
-          lastName: string;
-          email: string;
-          role: string;
-          status: string;
-          joinedAt: Date;
-        }>;
-      }>
+      result as ISuccessPayload<GetOrganizationMembersOutput>
     ).data;
 
     return res.status(200).json({
       success: true,
       message: "Organization members retrieved successfully",
+      data: output,
+    });
+  },
+);
+
+export const inviteMember = routeTryCatcher(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user as IUser;
+
+    const result = await OrganizationService.inviteMember(user, req.body);
+
+    if ((result as IErrorPayload).error) {
+      const error = (result as IErrorPayload).error;
+      if (error === "User does not have an organization")
+        return next(AppError.notFound(error));
+      return next(AppError.badRequest(error || "Failed to send invitation"));
+    }
+
+    const output: InviteMemberOutput = (
+      result as ISuccessPayload<InviteMemberOutput>
+    ).data;
+
+    return res.status(201).json({
+      success: true,
+      message: "Invitation sent successfully",
       data: output,
     });
   },

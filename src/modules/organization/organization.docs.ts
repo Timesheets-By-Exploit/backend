@@ -4,6 +4,8 @@ import {
   CreateOrganizationOutput,
   GetOrganizationOutput,
   GetOrganizationMembersOutput,
+  InviteMemberInput,
+  InviteMemberOutput,
 } from "./organization.types";
 import { ISuccessPayload, IErrorPayload } from "src/types";
 
@@ -33,9 +35,22 @@ export type OrganizationApiSpec = Tspec.DefineApiSpec<{
     };
     "/members": {
       get: {
-        summary: "Get organization members (OWNER/ADMIN only)";
+        summary: "Get organization members (OWNER/MANAGER only)";
         responses: {
           200: ISuccessPayload<GetOrganizationMembersOutput>;
+          401: IErrorPayload;
+          403: IErrorPayload;
+          404: IErrorPayload;
+        };
+      };
+    };
+    "/invite": {
+      post: {
+        summary: "Invite a member to the organization (OWNER/MANAGER only)";
+        body: InviteMemberInput;
+        responses: {
+          201: ISuccessPayload<InviteMemberOutput>;
+          400: IErrorPayload;
           401: IErrorPayload;
           403: IErrorPayload;
           404: IErrorPayload;

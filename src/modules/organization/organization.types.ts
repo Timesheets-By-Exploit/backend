@@ -61,3 +61,28 @@ export type OrganizationMember = {
 export type GetOrganizationMembersOutput = {
   members: OrganizationMember[];
 };
+
+export type InviteMemberInput = {
+  email: string;
+  role: "OWNER" | "MANAGER" | "MEMBER" | "VIEWER";
+};
+
+export type InviteMemberOutput = {
+  invitationId: string;
+  emailSent: boolean;
+};
+
+export type GetUserOrganizationOutput = {
+  organization: IOrganization;
+  role: string;
+};
+
+export type PendingMembershipData = {
+  orgId: string;
+  userId?: string;
+  email?: string;
+  role: "OWNER" | "MANAGER" | "MEMBER" | "VIEWER";
+  status: "PENDING";
+  invitationToken: string;
+  invitedBy: string;
+};
