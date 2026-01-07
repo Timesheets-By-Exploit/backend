@@ -5,12 +5,14 @@ import requireRole from "@middlewares/requireRole";
 import {
   createOrganizationSchema,
   inviteMemberSchema,
+  acceptInviteSchema,
 } from "../organization.validators";
 import {
   createOrganization,
   getOrganization,
   getOrganizationMembers,
   inviteMember,
+  acceptInvite,
 } from "../organization.controller";
 
 const organizationRouter = Router();
@@ -37,6 +39,13 @@ organizationRouter.post(
   requireRole(["OWNER", "MANAGER"]),
   validateResource(inviteMemberSchema),
   inviteMember,
+);
+
+organizationRouter.post(
+  "/invite/accept",
+  authenticate,
+  validateResource(acceptInviteSchema),
+  acceptInvite,
 );
 
 export default organizationRouter;

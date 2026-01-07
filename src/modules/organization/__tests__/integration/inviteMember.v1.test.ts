@@ -658,7 +658,6 @@ describe("POST /api/v1/org/invite", () => {
       expect(membership?.role).toBe("MANAGER");
       expect(membership?.status).toBe("PENDING");
       expect(membership?.invitedBy?.toString()).toBe(owner._id.toString());
-      expect(membership?.invitationToken).toBeDefined();
     });
 
     it("should send email with correct merge info", async () => {
@@ -758,7 +757,6 @@ describe("POST /api/v1/org/invite", () => {
       );
       expect(membership).toBeDefined();
       expect(membership?.status).toBe("PENDING");
-      expect(membership?.invitationToken).toBeDefined();
       expect(membership?.invitedBy?.toString()).toBe(owner._id.toString());
     });
   });

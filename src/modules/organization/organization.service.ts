@@ -14,6 +14,8 @@ import {
 } from "./organization.types";
 import { ISuccessPayload, IErrorPayload } from "src/types";
 import { generateRandomTokenWithCrypto } from "@utils/generators";
+import { hashWithCrypto } from "@utils/encryptors";
+import { convertTimeToMilliseconds } from "@utils/index";
 import { sendInvitationEmail } from "./utils/invitationEmail";
 import { IMembership } from "@modules/membership/membership.types";
 
@@ -262,12 +264,17 @@ const OrganizationService = {
       }
 
       const invitationToken = generateRandomTokenWithCrypto(32);
+      const inviteTokenHash = hashWithCrypto(invitationToken);
+      const inviteExpiresAt = new Date(
+        Date.now() + convertTimeToMilliseconds(168, "hours"),
+      );
 
       const membershipData: PendingMembershipData = {
         orgId: organization._id.toString(),
         role: input.role,
         status: "PENDING",
-        invitationToken,
+        inviteTokenHash, // Store hash
+        inviteExpiresAt, // Store expiration
         invitedBy: inviter._id.toString(),
       };
 

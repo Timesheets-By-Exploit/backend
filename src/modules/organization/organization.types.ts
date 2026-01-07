@@ -1,6 +1,9 @@
 import mongoose from "mongoose";
 import { z } from "zod";
-import { createOrganizationSchema } from "./organization.validators";
+import {
+  createOrganizationSchema,
+  acceptInviteSchema,
+} from "./organization.validators";
 
 type Status = "ACTIVE" | "INACTIVE";
 
@@ -67,6 +70,13 @@ export type InviteMemberInput = {
   role: "OWNER" | "MANAGER" | "MEMBER" | "VIEWER";
 };
 
+export type AcceptInviteInput = z.infer<typeof acceptInviteSchema>;
+
+export type AcceptInviteOutput = {
+  membershipId: string;
+  orgId: string;
+};
+
 export type InviteMemberOutput = {
   invitationId: string;
   emailSent: boolean;
@@ -83,6 +93,7 @@ export type PendingMembershipData = {
   email?: string;
   role: "OWNER" | "MANAGER" | "MEMBER" | "VIEWER";
   status: "PENDING";
-  invitationToken: string;
+  inviteTokenHash: string;
+  inviteExpiresAt: Date;
   invitedBy: string;
 };

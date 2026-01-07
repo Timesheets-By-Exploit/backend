@@ -1,5 +1,8 @@
 import { Request, Response, NextFunction } from "express";
+import mongoose from "mongoose";
 import OrganizationService from "./organization.service";
+import MembershipService from "@modules/membership/membership.service";
+import { hashWithCrypto } from "@utils/encryptors";
 import {
   CreateOrganizationInput,
   CreateOrganizationOutput,
@@ -12,6 +15,7 @@ import AppError from "@utils/AppError";
 import { IErrorPayload, ISuccessPayload } from "src/types";
 import { routeTryCatcher } from "@utils/routeTryCatcher";
 import { IUser } from "@modules/user/user.types";
+import { IMembership } from "@modules/membership/membership.types";
 
 export const createOrganization = routeTryCatcher(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -137,5 +141,96 @@ export const inviteMember = routeTryCatcher(
       message: "Invitation sent successfully",
       data: output,
     });
+  },
+);
+
+export const acceptInvite = routeTryCatcher(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+      const { token } = req.body;
+      const user = req.user as IUser;
+
+      if (!user) {
+        await session.abortTransaction();
+        session.endSession();
+        return next(AppError.unauthorized("Authentication required"));
+      }
+
+      const existingMemberships = await MembershipService.getMembershipsByUser(
+        user._id.toString(),
+      );
+      const activeMembership = existingMemberships.find(
+        (m: IMembership) => m.status === "ACTIVE",
+      );
+
+      if (activeMembership) {
+        await session.abortTransaction();
+        session.endSession();
+        return next(
+          AppError.conflict("User already belongs to an organization"),
+        );
+      }
+
+      const inviteTokenHash = hashWithCrypto(token);
+
+      const membership = await MembershipService.getPendingMembershipByHash(
+        inviteTokenHash,
+        session,
+      );
+
+      if (!membership) {
+        await session.abortTransaction();
+        session.endSession();
+        return next(AppError.notFound("Invite not found"));
+      }
+
+      if (
+        membership.inviteExpiresAt &&
+        new Date() > membership.inviteExpiresAt
+      ) {
+        await session.abortTransaction();
+        session.endSession();
+        return next(new AppError("Invite expired", 410));
+      }
+
+      if (
+        membership.email &&
+        membership.email.toLowerCase() !== user.email.toLowerCase()
+      ) {
+        await session.abortTransaction();
+        session.endSession();
+        return next(AppError.forbidden("Invite email mismatch"));
+      }
+
+      membership.status = "ACTIVE";
+      membership.userId = user._id;
+      membership.acceptedAt = new Date();
+      membership.joinedAt = new Date();
+      membership.inviteTokenHash = null;
+      membership.inviteExpiresAt = null;
+
+      await membership.save({ session });
+
+      await session.commitTransaction();
+
+      return res.status(200).json({
+        success: true,
+        message: "Invitation accepted successfully",
+        data: {
+          membershipId: membership._id,
+          orgId: membership.orgId,
+        },
+      });
+    } catch (err) {
+      if (session.inTransaction()) {
+        await session.abortTransaction();
+      }
+      return next(AppError.internal((err as Error).message));
+    } finally {
+      session.endSession();
+    }
   },
 );

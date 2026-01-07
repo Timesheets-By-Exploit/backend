@@ -19,7 +19,8 @@ const MembershipService = {
         email?: string;
         role: string;
         status: string;
-        invitationToken?: string;
+        inviteTokenHash?: string;
+        inviteExpiresAt?: Date;
         invitedBy?: string;
       } = {
         orgId: input.orgId,
@@ -33,8 +34,11 @@ const MembershipService = {
         membershipData.email = input.email;
       }
 
-      if (input.invitationToken) {
-        membershipData.invitationToken = input.invitationToken;
+      if (input.inviteTokenHash) {
+        membershipData.inviteTokenHash = input.inviteTokenHash;
+      }
+      if (input.inviteExpiresAt) {
+        membershipData.inviteExpiresAt = input.inviteExpiresAt;
       }
       if (input.invitedBy) {
         membershipData.invitedBy = input.invitedBy;
@@ -42,9 +46,10 @@ const MembershipService = {
 
       const membership = new MembershipModel(membershipData);
 
-      if (session) await membership.save({ session });
-      else await membership.save();
+      await membership.save({ session: session || null });
 
+      if (input.email === "inviteeone@example.com")
+        console.log(membership, "inviteeone@example.com");
       return {
         success: true,
         data: {
@@ -57,6 +62,16 @@ const MembershipService = {
         error: (err as Error).message,
       };
     }
+  },
+
+  getPendingMembershipByHash: async (
+    input: string,
+    session?: mongoose.ClientSession | null,
+  ): Promise<IMembership | null> => {
+    return await MembershipModel.findOne({
+      inviteTokenHash: input,
+      status: "PENDING",
+    }).session(session || null);
   },
 
   getMembershipById: async (id: string): Promise<IMembership | null> => {
@@ -72,11 +87,12 @@ const MembershipService = {
   getMembershipByUserAndOrg: async (
     userId: string,
     orgId: string,
+    options?: { select: string },
   ): Promise<IMembership | null> => {
-    return await MembershipModel.findOne({
+    return MembershipModel.findOne({
       userId: new mongoose.Types.ObjectId(userId),
       orgId: new mongoose.Types.ObjectId(orgId),
-    });
+    }).select(options?.select || "");
   },
 
   getMembershipsByOrg: async (orgId: string): Promise<IMembership[]> => {

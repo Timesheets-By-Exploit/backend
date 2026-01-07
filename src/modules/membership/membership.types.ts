@@ -10,7 +10,10 @@ export interface IMembership extends mongoose.Document {
   email?: string | null;
   role: MembershipRole;
   status: MembershipStatus;
-  invitationToken?: string | null;
+  inviteTokenHash?: string | null;
+  inviteExpiresAt?: Date | null;
+  acceptedAt?: Date | null;
+  joinedAt?: Date | null;
   invitedBy?: mongoose.Types.ObjectId | null;
   createdAt: Date;
   updatedAt: Date;
@@ -22,7 +25,8 @@ export type CreateMembershipInput = {
   email?: string;
   role: MembershipRole;
   status?: MembershipStatus;
-  invitationToken?: string;
+  inviteTokenHash?: string;
+  inviteExpiresAt?: Date;
   invitedBy?: string;
 };
 
@@ -36,6 +40,7 @@ export type MembershipData = {
   email?: string;
   role: string;
   status: string;
-  invitationToken?: string;
+  inviteTokenHash?: string;
+  inviteExpiresAt?: Date;
   invitedBy?: string;
 };

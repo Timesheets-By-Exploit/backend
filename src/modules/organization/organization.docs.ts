@@ -6,6 +6,8 @@ import {
   GetOrganizationMembersOutput,
   InviteMemberInput,
   InviteMemberOutput,
+  AcceptInviteInput,
+  AcceptInviteOutput,
 } from "./organization.types";
 import { ISuccessPayload, IErrorPayload } from "src/types";
 
@@ -54,6 +56,21 @@ export type OrganizationApiSpec = Tspec.DefineApiSpec<{
           401: IErrorPayload;
           403: IErrorPayload;
           404: IErrorPayload;
+        };
+      };
+    };
+    "/invite/accept": {
+      post: {
+        summary: "Accept an organization invitation";
+        body: AcceptInviteInput;
+        responses: {
+          200: ISuccessPayload<AcceptInviteOutput>;
+          400: IErrorPayload;
+          401: IErrorPayload;
+          403: IErrorPayload;
+          404: IErrorPayload;
+          409: IErrorPayload;
+          410: IErrorPayload;
         };
       };
     };

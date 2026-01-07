@@ -20,3 +20,7 @@ export const inviteMemberSchema = z.object({
     errorMap: () => ({ message: "Invalid role" }),
   }),
 });
+
+export const acceptInviteSchema = z.object({
+  token: z.string({ required_error: "Token is required" }),
+});

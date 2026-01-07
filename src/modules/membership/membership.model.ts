@@ -31,8 +31,21 @@ const membershipSchema = new Schema<IMembership>(
       enum: ["ACTIVE", "DISABLED", "PENDING"],
       default: "ACTIVE",
     },
-    invitationToken: {
+    inviteTokenHash: {
       type: String,
+      default: null,
+      select: false,
+    },
+    inviteExpiresAt: {
+      type: Date,
+      default: null,
+    },
+    acceptedAt: {
+      type: Date,
+      default: null,
+    },
+    joinedAt: {
+      type: Date,
       default: null,
     },
     invitedBy: {
