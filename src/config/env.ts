@@ -40,7 +40,7 @@ const env = isTest
         EMAIL_VERIFICATION_TEMPLATE_KEY: "",
         PASSWORD_RESET_TEMPLATE_KEY: "",
         INVITATION_TEMPLATE_KEY: "",
-        FRONTEND_BASE_URL: "",
+        FRONTEND_BASE_URL: "http://localhost:3000",
       },
       error: envSchema.safeParse(process.env).error,
     }
