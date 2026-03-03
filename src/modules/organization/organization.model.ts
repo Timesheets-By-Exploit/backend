@@ -1,6 +1,7 @@
 import mongoose, { model } from "mongoose";
 import { IOrganization } from "./organization.types";
 import { slugify } from "@utils/index";
+import { ORG_STATUS } from "@constants";
 
 const organizationSchema = new mongoose.Schema<IOrganization>(
   {
@@ -21,8 +22,8 @@ const organizationSchema = new mongoose.Schema<IOrganization>(
     description: { type: String, trim: true },
     status: {
       type: String,
-      enum: ["ACTIVE", "INACTIVE"],
-      default: "ACTIVE",
+      enum: Object.values(ORG_STATUS),
+      default: ORG_STATUS.ACTIVE,
     },
     size: {
       type: Number,

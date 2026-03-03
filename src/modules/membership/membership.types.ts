@@ -1,14 +1,12 @@
 import mongoose from "mongoose";
-
-export type MembershipRole = "OWNER" | "MANAGER" | "MEMBER" | "VIEWER";
-export type MembershipStatus = "ACTIVE" | "DISABLED" | "PENDING";
+import { UserRole, MembershipStatus } from "@constants";
 
 export interface IMembership extends mongoose.Document {
   _id: mongoose.Types.ObjectId;
   orgId: mongoose.Types.ObjectId;
   userId?: mongoose.Types.ObjectId | null;
   email?: string | null;
-  role: MembershipRole;
+  role: UserRole;
   status: MembershipStatus;
   inviteTokenHash?: string | null;
   inviteExpiresAt?: Date | null;
@@ -23,7 +21,7 @@ export type CreateMembershipInput = {
   orgId: string;
   userId?: string;
   email?: string;
-  role: MembershipRole;
+  role: UserRole;
   status?: MembershipStatus;
   inviteTokenHash?: string;
   inviteExpiresAt?: Date;

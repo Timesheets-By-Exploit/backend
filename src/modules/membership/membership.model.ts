@@ -1,5 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import { IMembership } from "./membership.types";
+import { USER_ROLES, MEMBERSHIP_STATUS } from "@constants";
 
 const membershipSchema = new Schema<IMembership>(
   {
@@ -23,13 +24,13 @@ const membershipSchema = new Schema<IMembership>(
     },
     role: {
       type: String,
-      enum: ["OWNER", "MANAGER", "MEMBER", "VIEWER"],
+      enum: Object.values(USER_ROLES),
       required: true,
     },
     status: {
       type: String,
-      enum: ["ACTIVE", "DISABLED", "PENDING"],
-      default: "ACTIVE",
+      enum: Object.values(MEMBERSHIP_STATUS),
+      default: MEMBERSHIP_STATUS.ACTIVE,
     },
     inviteTokenHash: {
       type: String,

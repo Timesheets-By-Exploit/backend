@@ -14,6 +14,11 @@ const userSchema = new Schema<IUser>(
     emailVerificationCodeExpiry: { type: Date, default: null },
     passwordResetCode: { type: String, default: null },
     passwordResetCodeExpiry: { type: Date, default: null },
+    activeTimerId: {
+      type: Schema.Types.ObjectId,
+      ref: "TimeEntry",
+      default: null,
+    },
   },
   { timestamps: true },
 );

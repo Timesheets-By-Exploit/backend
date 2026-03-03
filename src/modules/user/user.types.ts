@@ -14,6 +14,7 @@ export interface IUser extends mongoose.Document {
   emailVerificationCodeExpiry?: Date | null;
   passwordResetCode?: string | null;
   passwordResetCodeExpiry?: Date | null;
+  activeTimerId?: mongoose.Types.ObjectId | null;
   generateEmailVerificationCode: () => string;
   verifyEmailVerificationCode: (code: string) => boolean;
   clearEmailVerificationData: () => Promise<void>;

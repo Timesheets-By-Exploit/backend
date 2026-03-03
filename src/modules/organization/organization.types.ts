@@ -4,8 +4,7 @@ import {
   createOrganizationSchema,
   acceptInviteSchema,
 } from "./organization.validators";
-
-type Status = "ACTIVE" | "INACTIVE";
+import { OrgStatus, UserRole } from "@constants";
 
 export interface IOrganization extends mongoose.Document {
   _id: mongoose.Types.ObjectId;
@@ -16,7 +15,7 @@ export interface IOrganization extends mongoose.Document {
   description?: string;
   createdAt: Date;
   updatedAt: Date;
-  status: Status;
+  status: OrgStatus;
   size: number;
   settings: {
     timezone: string;
@@ -38,7 +37,7 @@ export type GetOrganizationOutput = {
     slug: string;
     domain?: string;
     description?: string;
-    status: string;
+    status: OrgStatus;
     size: number;
     settings: {
       timezone: string;
@@ -47,7 +46,7 @@ export type GetOrganizationOutput = {
     createdAt: Date;
     updatedAt: Date;
   };
-  role: string;
+  role: string | UserRole;
 };
 
 export type OrganizationMember = {
@@ -56,7 +55,7 @@ export type OrganizationMember = {
   firstName: string;
   lastName: string;
   email: string;
-  role: string;
+  role: UserRole;
   status: string;
   joinedAt: Date;
 };
@@ -67,7 +66,7 @@ export type GetOrganizationMembersOutput = {
 
 export type InviteMemberInput = {
   email: string;
-  role: "OWNER" | "MANAGER" | "MEMBER" | "VIEWER";
+  role: UserRole;
 };
 
 export type AcceptInviteInput = z.infer<typeof acceptInviteSchema>;
@@ -84,14 +83,14 @@ export type InviteMemberOutput = {
 
 export type GetUserOrganizationOutput = {
   organization: IOrganization;
-  role: string;
+  role: string | UserRole;
 };
 
 export type PendingMembershipData = {
   orgId: string;
   userId?: string;
   email?: string;
-  role: "OWNER" | "MANAGER" | "MEMBER" | "VIEWER";
+  role: UserRole;
   status: "PENDING";
   inviteTokenHash: string;
   inviteExpiresAt: Date;

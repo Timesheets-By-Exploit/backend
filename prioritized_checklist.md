@@ -9,21 +9,21 @@ This checklist breaks down the [Implementation Plan](file:///Users/exploit/Deskt
 - [x] **Rate Limiting**: Add `express-rate-limit` to sensitive routes (Auth, Invitations).
 
 ### Phase 2: Metadata Modules (Foundation)
-- [ ] **Tag Module**: Implement basic CRUD (Create, Read, Update, Delete) for tags.
-- [ ] **Client Module**: Implement CRUD for clients (Name, Address, Currency).
-- [ ] **Project Module**: Implement CRUD for projects (Name, Color, Billable status, link to Client).
-- [ ] **Task Module**: Implement CRUD for tasks within projects.
+- [x] **Tag Module**: Implement basic CRUD (Create, Read, Update, Delete) for tags.
+- [x] **Client Module**: Implement CRUD for clients (name, email, address, etc.).
+- [x] **Project Module**: Implement CRUD for projects (Name, Color, Billable status, link to Client).
+- [x] **Task Module**: Implement CRUD for tasks within projects.
 
 ### Phase 3: Core Logic (The Meat)
-- [ ] **Time Entry Model**: Define the Mongoose schema for time entries.
-- [ ] **Manual Time Entry**: Multi-step implementation:
-    - [ ] Create manual time entry (POST).
-    - [ ] List user time entries (GET).
-    - [ ] Update/Delete entry (PATCH/DELETE).
-- [ ] **Timer Implementation**:
-    - [ ] Start timer (POST - sets `startTime`, `endTime` is null).
-    - [ ] Stop timer (PATCH - calculates `duration` and sets `endTime`).
-    - [ ] Prevent multiple active timers per user.
+- [x] **Time Entry Model**: Define the Mongoose schema for time entries.
+- [x] **Manual Time Entry**: Multi-step implementation:
+    - [x] Create manual time entry (POST).
+    - [x] List user time entries (GET).
+    - [x] Update/Delete entry (PATCH/DELETE).
+- [x] **Timer Implementation**:
+    - [x] Start timer (POST - sets `startTime`, `endTime` is null).
+    - [x] Stop timer (PATCH - calculates `duration` and sets `endTime`).
+    - [x] Prevent multiple active timers per user.
 
 ### Phase 4: Observability & DevOps
 - [ ] **Structured Logging**: Integrate `pino` or `winston` and replace existing `console.log` calls.

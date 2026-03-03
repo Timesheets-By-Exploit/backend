@@ -20,5 +20,6 @@ export default {
     "^@middlewares/(.*)$": "<rootDir>/src/middlewares/$1",
     "^@docs/(.*)$": "<rootDir>/src/docs/$1",
     "^@services/(.*)$": "<rootDir>/src/services/$1",
+    "^@constants$": "<rootDir>/src/constants/index.ts",
   },
 };
