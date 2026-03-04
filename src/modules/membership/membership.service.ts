@@ -48,8 +48,6 @@ const MembershipService = {
 
       await membership.save({ session: session || null });
 
-      if (input.email === "inviteeone@example.com")
-        console.log(membership, "inviteeone@example.com");
       return {
         success: true,
         data: {

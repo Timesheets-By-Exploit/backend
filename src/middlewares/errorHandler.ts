@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import AppError from "../utils/AppError";
 import { NODE_ENV } from "@config/env";
+import { logger } from "@config/logger";
 import { MongooseError } from "mongoose";
 
 const errorHandler = (
@@ -19,12 +20,15 @@ const errorHandler = (
   }
 
   if (err instanceof Error || err instanceof MongooseError) {
+    logger.error({ err }, "Unhandled error");
     return res.status(500).json({
       success: false,
       error: err.message || "Something went wrong",
       stack: NODE_ENV === "development" ? err.stack : "",
     });
   }
+
+  logger.error({ err }, "Unhandled non-Error thrown");
   return res.status(500).json({
     success: false,
     error: "Something went wrong",

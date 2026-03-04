@@ -2,7 +2,7 @@ import express, { Application, NextFunction, Request, Response } from "express";
 import helmet from "helmet";
 import { rateLimit } from "express-rate-limit";
 import cors from "cors";
-import morgan from "morgan";
+import { httpLogger } from "@config/logger";
 import v1Router from "./routes/v1.route";
 import errorHandler from "./middlewares/errorHandler";
 import cookieParser from "cookie-parser";
@@ -39,7 +39,7 @@ app.use(
 );
 app.use(cookieParser(COOKIE_SECRET));
 app.use(express.json());
-app.use(morgan("dev"));
+app.use(httpLogger);
 
 app.use("/api/v1", v1Router);
 export function mountSwagger(spec: object) {
