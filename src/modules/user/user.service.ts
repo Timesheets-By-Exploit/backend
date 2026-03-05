@@ -9,6 +9,21 @@ const UserService = {
   getUserById: async (id: string): Promise<IUser | null> => {
     return await UserModel.findById(id);
   },
+
+  createUser: async (
+    input: Pick<IUser, "firstName" | "lastName" | "email" | "password">,
+  ): Promise<IUser> => {
+    const { firstName, lastName, email, password } = input;
+    const user = new UserModel({
+      firstName,
+      lastName,
+      email,
+      password,
+      role: "owner",
+    });
+    await user.save();
+    return user;
+  },
 };
 
 export default UserService;

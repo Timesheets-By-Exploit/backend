@@ -7,7 +7,7 @@ import {
   extractSignedCookie,
 } from "@tests/utils";
 import { RefreshTokenModel } from "@modules/auth/refreshToken.model";
-import UserModel from "@modules/user/user.model";
+import UserService from "@modules/user/user.service";
 import { TEST_CONSTANTS } from "../helpers/testHelpers";
 
 const { verifiedUserEmail, testPassword } = TEST_CONSTANTS;
@@ -109,7 +109,7 @@ describe("Auth Logout", () => {
     );
     if (!refreshTokenValue) throw new Error("Refresh token cookie not found");
 
-    const userDoc = await UserModel.findOne({ email: verifiedUserEmail });
+    const userDoc = await UserService.getUserByEmail(verifiedUserEmail);
     if (!userDoc) throw new Error("User not found");
 
     const tokenDoc = await RefreshTokenModel.findOne({

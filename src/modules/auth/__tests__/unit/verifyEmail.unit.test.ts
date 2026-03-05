@@ -1,10 +1,10 @@
-import UserModel from "@modules/user/user.model";
+import UserService from "@modules/user/user.service";
 import { UserFactory } from "@tests/factories/user.factory";
 import { convertTimeToMilliseconds } from "@utils/index";
 
 describe("Email Verification Code Logic", () => {
   it("successfully generates a hashed email verification code", async () => {
-    const user = new UserModel(UserFactory.generate());
+    const user = await UserService.createUser(UserFactory.generate());
     const code = user.generateEmailVerificationCode();
     expect(code).toHaveLength(6);
     expect(code).not.toBe(user.emailVerificationCode);
@@ -12,7 +12,7 @@ describe("Email Verification Code Logic", () => {
   });
 
   it("fails verification if code is wrong", async () => {
-    const user = new UserModel(UserFactory.generate());
+    const user = await UserService.createUser(UserFactory.generate());
     const code = user.generateEmailVerificationCode();
     const isCorrectCode = user.verifyEmailVerificationCode(
       code.split("").reverse().join(""),
@@ -22,7 +22,7 @@ describe("Email Verification Code Logic", () => {
   });
 
   it("fails verification if code is expired", async () => {
-    const user = new UserModel(UserFactory.generate());
+    const user = await UserService.createUser(UserFactory.generate());
     const code = user.generateEmailVerificationCode();
     user.emailVerificationCodeExpiry = new Date(
       Date.now() - convertTimeToMilliseconds(60, "minutes"),
@@ -33,9 +33,8 @@ describe("Email Verification Code Logic", () => {
   });
 
   it("successfully verifies code with correct code", async () => {
-    const user = new UserModel({
+    const user = await UserService.createUser({
       ...UserFactory.generate(),
-      role: "owner",
     });
     const code = user.generateEmailVerificationCode();
     await user.save();
@@ -45,9 +44,8 @@ describe("Email Verification Code Logic", () => {
   });
 
   it("clears verification data after clearing", async () => {
-    const user = new UserModel({
+    const user = await UserService.createUser({
       ...UserFactory.generate(),
-      role: "owner",
     });
     user.generateEmailVerificationCode();
     await user.save();

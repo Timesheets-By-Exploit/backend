@@ -1,0 +1,38 @@
+services:
+  - type: web
+    name: timesheets-api
+    runtime: docker
+    plan: free
+    branch: main
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "5000"
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: JWT_ACCESS_EXPIRES_IN
+        sync: false
+      - key: JWT_REFRESH_EXPIRES_IN
+        sync: false
+      - key: REFRESH_TOKEN_BYTES
+        sync: false
+      - key: COOKIE_SECRET
+        sync: false
+      - key: ZEPTO_MAIL_TOKEN
+        sync: false
+      - key: ZEPTO_MAIL_URL
+        sync: false
+      - key: FROM_EMAIL
+        sync: false
+      - key: SUPPORT_EMAIL
+        sync: false
+      - key: FROM_NAME
+        sync: false
+      - key: EMAIL_VERIFICATION_TEMPLATE_KEY
+        sync: false
+      - key: PASSWORD_RESET_TEMPLATE_KEY
+        sync: false

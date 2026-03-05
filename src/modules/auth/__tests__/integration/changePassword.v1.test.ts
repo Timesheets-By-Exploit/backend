@@ -3,7 +3,7 @@ import app from "@app";
 import { seedOneUserWithOrg } from "@tests/helpers/seed";
 import { clearDB } from "@tests/utils";
 import { generateAccessToken } from "@modules/auth/utils/auth.tokens";
-import UserModel from "@modules/user/user.model";
+import UserService from "@modules/user/user.service";
 import { compareHashedBcryptString } from "@utils/encryptors";
 import {
   TEST_CONSTANTS,
@@ -50,7 +50,7 @@ describe("POST /api/v1/auth/change-password", () => {
   });
 
   it("should return 400 if currentPassword is missing", async () => {
-    const user = await UserModel.findOne({ email: verifiedUserEmail });
+    const user = await UserService.getUserByEmail(verifiedUserEmail);
     if (!user) throw new Error("User not found");
 
     const accessToken = generateAccessToken({
@@ -72,7 +72,7 @@ describe("POST /api/v1/auth/change-password", () => {
   });
 
   it("should return 400 if newPassword is missing", async () => {
-    const user = await UserModel.findOne({ email: verifiedUserEmail });
+    const user = await UserService.getUserByEmail(verifiedUserEmail);
     if (!user) throw new Error("User not found");
 
     const accessToken = generateAccessToken({
@@ -94,7 +94,7 @@ describe("POST /api/v1/auth/change-password", () => {
   });
 
   it("should return 400 if newPassword is less than 6 characters", async () => {
-    const user = await UserModel.findOne({ email: verifiedUserEmail });
+    const user = await UserService.getUserByEmail(verifiedUserEmail);
     if (!user) throw new Error("User not found");
 
     const accessToken = generateAccessToken({
@@ -117,7 +117,7 @@ describe("POST /api/v1/auth/change-password", () => {
   });
 
   it("should return 400 if newPassword is the same as currentPassword", async () => {
-    const user = await UserModel.findOne({ email: verifiedUserEmail });
+    const user = await UserService.getUserByEmail(verifiedUserEmail);
     if (!user) throw new Error("User not found");
 
     const accessToken = generateAccessToken({
@@ -140,7 +140,7 @@ describe("POST /api/v1/auth/change-password", () => {
   });
 
   it("should return 400 if current password is incorrect", async () => {
-    const user = await UserModel.findOne({ email: verifiedUserEmail });
+    const user = await UserService.getUserByEmail(verifiedUserEmail);
     if (!user) throw new Error("User not found");
 
     const accessToken = generateAccessToken({
@@ -164,7 +164,7 @@ describe("POST /api/v1/auth/change-password", () => {
   });
 
   it("should successfully change password with valid credentials", async () => {
-    const user = await UserModel.findOne({ email: verifiedUserEmail });
+    const user = await UserService.getUserByEmail(verifiedUserEmail);
     if (!user) throw new Error("User not found");
 
     const accessToken = generateAccessToken({
@@ -188,7 +188,7 @@ describe("POST /api/v1/auth/change-password", () => {
   });
 
   it("should update password in database after successful change", async () => {
-    const user = await UserModel.findOne({ email: verifiedUserEmail });
+    const user = await UserService.getUserByEmail(verifiedUserEmail);
     if (!user) throw new Error("User not found");
 
     const accessToken = generateAccessToken({
@@ -208,7 +208,7 @@ describe("POST /api/v1/auth/change-password", () => {
 
     expect(res.status).toBe(200);
 
-    const updatedUser = await UserModel.findById(user._id);
+    const updatedUser = await UserService.getUserById(user._id.toString());
     if (!updatedUser) throw new Error("User not found");
 
     const isNewPasswordValid = await compareHashedBcryptString(
@@ -225,7 +225,7 @@ describe("POST /api/v1/auth/change-password", () => {
   });
 
   it("should allow login with new password after change", async () => {
-    const user = await UserModel.findOne({ email: verifiedUserEmail });
+    const user = await UserService.getUserByEmail(verifiedUserEmail);
     if (!user) throw new Error("User not found");
 
     const accessToken = generateAccessToken({
@@ -253,7 +253,7 @@ describe("POST /api/v1/auth/change-password", () => {
   });
 
   it("should not allow login with old password after change", async () => {
-    const user = await UserModel.findOne({ email: verifiedUserEmail });
+    const user = await UserService.getUserByEmail(verifiedUserEmail);
     if (!user) throw new Error("User not found");
 
     const accessToken = generateAccessToken({
