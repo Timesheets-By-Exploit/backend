@@ -3,10 +3,10 @@ import app from "@app";
 import { seedOneUserWithOrg } from "@tests/helpers/seed";
 import { clearDB } from "@tests/utils";
 import { sendEmailWithTemplate } from "@services/email.service";
-import UserModel from "@modules/user/user.model";
 import { convertTimeToMilliseconds } from "@utils/index";
 import { compareHashedBcryptString } from "@utils/encryptors";
 import { TEST_CONSTANTS } from "../helpers/testHelpers";
+import UserService from "@modules/user/user.service";
 
 jest.mock("@services/email.service");
 
@@ -157,7 +157,7 @@ describe("POST /api/v1/auth/reset-password", () => {
       .post("/api/v1/auth/forgot-password")
       .send({ email: verifiedUserEmail });
 
-    const user = await UserModel.findOne({ email: verifiedUserEmail });
+    const user = await UserService.getUserByEmail(verifiedUserEmail);
     if (user) {
       user.passwordResetCodeExpiry = new Date(
         Date.now() - convertTimeToMilliseconds(1, "min"),
@@ -221,7 +221,7 @@ describe("POST /api/v1/auth/reset-password", () => {
       newPassword: newPassword,
     });
 
-    const user = await UserModel.findOne({ email: verifiedUserEmail });
+    const user = await UserService.getUserByEmail(verifiedUserEmail);
     expect(user).toBeTruthy();
 
     const isNewPasswordValid = await compareHashedBcryptString(
@@ -260,7 +260,7 @@ describe("POST /api/v1/auth/reset-password", () => {
 
     expect(resetRes.status).toBe(200);
 
-    const user = await UserModel.findOne({ email: verifiedUserEmail }).lean();
+    const user = await UserService.getUserByEmail(verifiedUserEmail);
     expect(user).toBeTruthy();
     expect(user?.passwordResetCode).toBeNull();
     expect(user?.passwordResetCodeExpiry).toBeNull();

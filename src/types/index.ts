@@ -15,3 +15,9 @@ export interface ISuccessPayload<T> {
   success: boolean;
   data: T;
 }
+
+export interface Mappable {
+  _id: { toString(): string };
+  createdAt: Date;
+  updatedAt: Date;
+}

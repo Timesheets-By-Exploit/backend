@@ -6,11 +6,11 @@ import { RefreshTokenModel } from "@modules/auth/refreshToken.model";
 import { hashWithCrypto } from "@utils/encryptors";
 import { generateRandomTokenWithCrypto } from "@utils/generators";
 import { convertTimeToMilliseconds } from "@utils/index";
-import UserModel from "@modules/user/user.model";
 import * as cookie from "cookie";
 import * as signature from "cookie-signature";
 import { COOKIE_SECRET } from "@config/env";
 import { TEST_CONSTANTS } from "../helpers/testHelpers";
+import UserService from "@modules/user/user.service";
 
 const { verifiedUserEmail, testPassword } = TEST_CONSTANTS;
 
@@ -44,7 +44,7 @@ describe("Refresh Token", () => {
   });
 
   it("should return 401 if refresh token is expired", async () => {
-    const user = await UserModel.findOne({ email: verifiedUserEmail });
+    const user = await UserService.getUserByEmail(verifiedUserEmail);
     if (!user) throw new Error("User not found");
 
     const rawRefreshToken = generateRandomTokenWithCrypto(64);
@@ -65,7 +65,7 @@ describe("Refresh Token", () => {
   });
 
   it("should return 401 if refresh token is revoked", async () => {
-    const user = await UserModel.findOne({ email: verifiedUserEmail });
+    const user = await UserService.getUserByEmail(verifiedUserEmail);
     if (!user) throw new Error("User not found");
 
     const rawRefreshToken = generateRandomTokenWithCrypto(64);

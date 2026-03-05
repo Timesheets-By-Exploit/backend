@@ -3,6 +3,7 @@ dotenv.config();
 import app, { mountSwagger } from "./app";
 import connectDB from "./config/db";
 import { PORT } from "@config/env";
+import { logger } from "@config/logger";
 import { getTSpec } from "@docs/tspecGenerator";
 import { notFound } from "@middlewares/notFound";
 
@@ -13,7 +14,7 @@ async function start() {
   app.use("*", notFound);
 
   app.listen(PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
+    logger.info({ port: PORT }, "Server running");
   });
 }
 

@@ -1,11 +1,11 @@
-import UserModel from "@modules/user/user.model";
+import UserService from "@modules/user/user.service";
 import {
+  SignupInput,
+  SignupOutput,
+  SendEmailVerificationCodeOutput,
   EmailVerificationOutput,
   ForgotPasswordOutput,
   ResetPasswordOutput,
-  SendEmailVerificationCodeOutput,
-  SignupInput,
-  SignupOutput,
 } from "./auth.types";
 import { IUser } from "@modules/user/user.types";
 import { sendEmailWithTemplate } from "@services/email.service";
@@ -28,17 +28,11 @@ const AuthService = {
   signup: async (
     input: SignupInput,
   ): Promise<ISuccessPayload<SignupOutput> | IErrorPayload> => {
-    const { firstName, lastName, email, password } = input;
-    const existingUser = await UserModel.exists({ email });
+    const existingUser =
+      (await UserService.getUserByEmail(input.email)) !== null;
     if (existingUser) return { success: false, error: "User already exists" };
 
-    const createdUser = new UserModel({
-      firstName,
-      lastName,
-      email,
-      password,
-      role: "owner",
-    });
+    const createdUser = await UserService.createUser(input);
 
     await createdUser.save();
     const res = await AuthService.sendVerificationEmail(createdUser);
@@ -92,9 +86,7 @@ const AuthService = {
     code: string,
     email: string,
   ): Promise<ISuccessPayload<EmailVerificationOutput> | IErrorPayload> => {
-    const user = await UserModel.findOne({
-      email: email,
-    });
+    const user = await UserService.getUserByEmail(email);
     if (!user)
       return {
         success: false,
@@ -245,7 +237,7 @@ const AuthService = {
     email: string,
   ): Promise<ISuccessPayload<ForgotPasswordOutput> | IErrorPayload> => {
     try {
-      const user = await UserModel.findOne({ email });
+      const user = await UserService.getUserByEmail(email);
       if (!user) {
         return {
           success: true,
@@ -303,7 +295,7 @@ const AuthService = {
     newPassword: string,
   ): Promise<ISuccessPayload<ResetPasswordOutput> | IErrorPayload> => {
     try {
-      const user = await UserModel.findOne({ email });
+      const user = await UserService.getUserByEmail(email);
       if (!user)
         return {
           success: false,

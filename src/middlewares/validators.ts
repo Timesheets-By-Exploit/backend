@@ -3,9 +3,11 @@ import { Request, Response, NextFunction } from "express";
 import AppError from "@utils/AppError";
 
 const validateResource =
-  (schema: ZodSchema) => (req: Request, _res: Response, next: NextFunction) => {
+  (schema: ZodSchema, source: "body" | "query" = "body") =>
+  (req: Request, _res: Response, next: NextFunction) => {
     try {
-      schema.parse(req.body);
+      const data = source === "query" ? req.query : req.body;
+      schema.parse(data);
       next();
     } catch (e: unknown) {
       return next(

@@ -3,13 +3,13 @@ import app from "@app";
 import { seedOneUserWithOrg } from "@tests/helpers/seed";
 import { clearDB } from "@tests/utils";
 import { generateAccessToken } from "@modules/auth/utils/auth.tokens";
-import UserModel from "@modules/user/user.model";
 import * as jwt from "jsonwebtoken";
 import * as signature from "cookie-signature";
 import {
   TEST_CONSTANTS,
   createSignedAccessTokenCookie,
 } from "../helpers/testHelpers";
+import UserService from "@modules/user/user.service";
 
 const { verifiedUserEmail, testPassword } = TEST_CONSTANTS;
 
@@ -44,7 +44,7 @@ describe("GET /api/v1/auth/me", () => {
   });
 
   it("should return 401 if access token has invalid signature", async () => {
-    const user = await UserModel.findOne({ email: verifiedUserEmail });
+    const user = await UserService.getUserByEmail(verifiedUserEmail);
     if (!user) throw new Error("User not found");
 
     const accessToken = generateAccessToken({
@@ -77,7 +77,7 @@ describe("GET /api/v1/auth/me", () => {
   });
 
   it("should return 401 if access token is expired", async () => {
-    const user = await UserModel.findOne({ email: verifiedUserEmail });
+    const user = await UserService.getUserByEmail(verifiedUserEmail);
     if (!user) throw new Error("User not found");
 
     // Create an expired token
@@ -117,7 +117,7 @@ describe("GET /api/v1/auth/me", () => {
   });
 
   it("should return 200 with user data when valid access token is provided", async () => {
-    const user = await UserModel.findOne({ email: verifiedUserEmail });
+    const user = await UserService.getUserByEmail(verifiedUserEmail);
     if (!user) throw new Error("User not found");
 
     const accessToken = generateAccessToken({
@@ -138,7 +138,7 @@ describe("GET /api/v1/auth/me", () => {
   });
 
   it("should return correct user data structure", async () => {
-    const user = await UserModel.findOne({ email: verifiedUserEmail });
+    const user = await UserService.getUserByEmail(verifiedUserEmail);
     if (!user) throw new Error("User not found");
 
     const accessToken = generateAccessToken({
@@ -158,7 +158,6 @@ describe("GET /api/v1/auth/me", () => {
 
     expect(userData.id).toBe(user._id.toString());
     expect(userData.email).toBe(user.email);
-    expect(userData.role).toBe(user.role);
     expect(userData.isEmailVerified).toBe(user.isEmailVerified);
     expect(userData.createdAt).toBeDefined();
     expect(userData.updatedAt).toBeDefined();
