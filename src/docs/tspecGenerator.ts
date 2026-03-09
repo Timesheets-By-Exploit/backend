@@ -1,6 +1,8 @@
-import { generateTspec, Tspec } from "tspec";
+import fs from "fs";
+import path from "path";
+import { Tspec } from "tspec";
 
-const options: Tspec.GenerateParams = {
+const options = {
   specPathGlobs: ["src/**/*.ts"],
   tsconfigPath: "./tsconfig.json",
   outputPath: "openapi.json",
@@ -16,5 +18,21 @@ const options: Tspec.GenerateParams = {
 };
 
 export async function getTSpec() {
-  return await generateTspec(options);
+  if (
+    process.env.NODE_ENV === "production" ||
+    process.env.TSPEC_STATIC === "true"
+  ) {
+    try {
+      const specPath = path.join(process.cwd(), "openapi.json");
+      const spec = JSON.parse(fs.readFileSync(specPath, "utf8"));
+      return spec;
+    } catch (error) {
+      console.error("Failed to load pre-generated OpenAPI spec:", error);
+      throw error;
+    }
+  }
+
+  // Dynamic import to avoid runtime dependency in production
+  const { generateTspec } = await import("tspec");
+  return await generateTspec(options as Tspec.GenerateParams | undefined);
 }
