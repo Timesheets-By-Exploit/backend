@@ -48,7 +48,8 @@ export type LoginOutput = {
     email: string;
     isEmailVerified: boolean;
     id: string;
-    name: string;
+    firstName: string;
+    lastName: string;
     role: string;
     createdAt: string;
     updatedAt: string;
@@ -65,7 +66,8 @@ export type GetMeOutput = {
   user: {
     id: string;
     email: string;
-    name: string;
+    firstName: string;
+    lastName: string;
     role: string;
     isEmailVerified: boolean;
     createdAt: Date;
