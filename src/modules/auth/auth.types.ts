@@ -48,7 +48,8 @@ export type LoginOutput = {
     email: string;
     isEmailVerified: boolean;
     id: string;
-    name: string;
+    firstName: string;
+    lastName: string;
     role: string;
     createdAt: string;
     updatedAt: string;
