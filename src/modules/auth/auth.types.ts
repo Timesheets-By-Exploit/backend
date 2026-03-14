@@ -65,7 +65,8 @@ export type GetMeOutput = {
   user: {
     id: string;
     email: string;
-    name: string;
+    firstName: string;
+    lastName: string;
     role: string;
     isEmailVerified: boolean;
     createdAt: Date;

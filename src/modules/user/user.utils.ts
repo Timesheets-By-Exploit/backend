@@ -9,11 +9,12 @@ export function serializeUser(user: IUser) {
   const safe = {
     id: obj._id?.toString(),
     email: obj.email,
-    name: obj.name,
     role: obj.role,
     isEmailVerified: obj.isEmailVerified,
     createdAt: obj.createdAt,
     updatedAt: obj.updatedAt,
+    firstName: obj.firstName,
+    lastName: obj.lastName,
   };
 
   return safe;
