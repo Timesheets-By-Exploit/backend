@@ -143,7 +143,7 @@ export async function rotateRefreshToken(
     }
     throw err;
   } finally {
-    session.endSession();
+    await session.endSession();
   }
 }
 

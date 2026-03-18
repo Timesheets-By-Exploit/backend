@@ -71,8 +71,11 @@ const AuthService = {
         mail_template_key: EMAIL_VERIFICATION_TEMPLATE_KEY,
         template_alias: "email-verification",
       });
+      if (!emailSentResponse.success) {
+        return { success: false, error: "Failed to send verification email" };
+      }
       return {
-        success: emailSentResponse.success,
+        success: true,
         data: { emailSent: emailSentResponse.emailSent || false },
       };
     } catch (err) {
