@@ -37,7 +37,7 @@ authRouter.post(
   resendEmailVerificationCode,
 );
 authRouter.post("/login", validateResource(loginSchema), loginUser);
-authRouter.get("/refresh", refreshToken);
+authRouter.post("/refresh", refreshToken);
 authRouter.get("/me", authenticate, getCurrentUser);
 authRouter.post("/logout", logoutUser);
 authRouter.post(

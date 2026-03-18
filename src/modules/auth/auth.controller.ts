@@ -60,7 +60,11 @@ export const verifyEmailVerificationCode = routeTryCatcher(
 export const resendEmailVerificationCode = routeTryCatcher(
   async (req: Request, res: Response, next: NextFunction) => {
     const user = await UserService.getUserByEmail(req.body.email);
-    if (!user) return next(AppError.badRequest("User not found"));
+    if (!user)
+      return res.status(200).json({
+        success: true,
+        data: { emailSent: true },
+      });
     const result = await AuthService.sendVerificationEmail(user);
     if (!result.success)
       return next(
@@ -116,10 +120,13 @@ export const refreshToken = routeTryCatcher(
     const token = req.signedCookies?.refresh_token;
     if (!token) return next(AppError.unauthorized("Unauthenticated"));
 
-    const result = await AuthService.rotateRefreshToken(token, req.ip);
+    const result = await AuthService.rotateRefreshToken(
+      token,
+      req.ip,
+      req.get("User-Agent"),
+    );
     if (!result.success) {
-      res.clearCookie("access_token");
-      res.clearCookie("refresh_token");
+      clearAuthCookies(res);
       return next(AppError.unauthorized(result.error || "Session expired"));
     }
 

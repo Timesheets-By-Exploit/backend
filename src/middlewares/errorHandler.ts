@@ -23,8 +23,8 @@ const errorHandler = (
     logger.error({ err }, "Unhandled error");
     return res.status(500).json({
       success: false,
-      error: err.message || "Something went wrong",
-      stack: NODE_ENV === "development" ? err.stack : "",
+      error: NODE_ENV === "development" ? err.message : "Internal server error",
+      stack: NODE_ENV === "development" ? err.stack : undefined,
     });
   }
 

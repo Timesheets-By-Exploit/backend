@@ -28,7 +28,7 @@ beforeEach(async () => {
 
 describe("Refresh Token", () => {
   it("should return 401 if refresh token cookie is missing", async () => {
-    const res = await request(app).get("/api/v1/auth/refresh");
+    const res = await request(app).post("/api/v1/auth/refresh");
 
     expect(res.status).toBe(401);
     expect(res.body.success).toBe(false);
@@ -36,7 +36,7 @@ describe("Refresh Token", () => {
 
   it("should return 401 if refresh token is invalid", async () => {
     const res = await request(app)
-      .get("/api/v1/auth/refresh")
+      .post("/api/v1/auth/refresh")
       .set("Cookie", ["refresh_token=invalid_token"]);
 
     expect(res.status).toBe(401);
@@ -57,7 +57,7 @@ describe("Refresh Token", () => {
     });
 
     const res = await request(app)
-      .get("/api/v1/auth/refresh")
+      .post("/api/v1/auth/refresh")
       .set("Cookie", [`refresh_token=${rawRefreshToken}`]);
 
     expect(res.status).toBe(401);
@@ -80,7 +80,7 @@ describe("Refresh Token", () => {
     });
 
     const res = await request(app)
-      .get("/api/v1/auth/refresh")
+      .post("/api/v1/auth/refresh")
       .set("Cookie", [`refresh_token=${rawRefreshToken}`]);
 
     expect(res.status).toBe(401);
@@ -103,7 +103,7 @@ describe("Refresh Token", () => {
 
     const refreshToken = refreshCookie.split("=")[1].split(";")[0];
     const refreshRes = await request(app)
-      .get("/api/v1/auth/refresh")
+      .post("/api/v1/auth/refresh")
       .set("Cookie", [`refresh_token=${refreshToken}`]);
     expect(refreshRes.status).toBe(200);
     expect(refreshRes.body.success).toBe(true);
@@ -163,7 +163,7 @@ describe("Refresh Token", () => {
     expect(oldTokenDoc?.revokedAt).toBeNull();
 
     const refreshRes = await request(app)
-      .get("/api/v1/auth/refresh")
+      .post("/api/v1/auth/refresh")
       .set("Cookie", [`refresh_token=${signedValue}`]);
 
     expect(refreshRes.status).toBe(200);
@@ -195,14 +195,14 @@ describe("Refresh Token", () => {
 
     // First refresh - should succeed
     const firstRefreshRes = await request(app)
-      .get("/api/v1/auth/refresh")
+      .post("/api/v1/auth/refresh")
       .set("Cookie", [`refresh_token=${refreshToken}`]);
 
     expect(firstRefreshRes.status).toBe(200);
 
     // Try to reuse the old token - should fail
     const secondRefreshRes = await request(app)
-      .get("/api/v1/auth/refresh")
+      .post("/api/v1/auth/refresh")
       .set("Cookie", [`refresh_token=${refreshToken}`]);
 
     expect(secondRefreshRes.status).toBe(401);
@@ -211,7 +211,7 @@ describe("Refresh Token", () => {
 
   it("should clear cookies when refresh token is invalid", async () => {
     const res = await request(app)
-      .get("/api/v1/auth/refresh")
+      .post("/api/v1/auth/refresh")
       .set("Cookie", ["refresh_token=invalid_token"]);
 
     expect(res.status).toBe(401);

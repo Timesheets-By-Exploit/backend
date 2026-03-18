@@ -1,5 +1,6 @@
 import { Router } from "express";
 import authRouter from "@modules/auth/routes/auth.v1.routes";
+import userRouter from "@modules/user/routes/user.v1.routes";
 import organizationRouter from "@modules/organization/routes/organization.v1.routes";
 import membershipRouter from "@modules/membership/routes/membership.v1.routes";
 import tagRouter from "@modules/tag/routes/tag.v1.routes";
@@ -10,6 +11,7 @@ import timeEntryRouter from "@modules/time-entry/routes/time-entry.v1.routes";
 
 const v1Router = Router();
 v1Router.use("/auth", authRouter);
+v1Router.use("/users", userRouter);
 v1Router.use("/org", organizationRouter);
 v1Router.use("/membership", membershipRouter);
 v1Router.use("/tags", tagRouter);

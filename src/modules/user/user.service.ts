@@ -10,6 +10,13 @@ const UserService = {
     return await UserModel.findById(id);
   },
 
+  updateUser: async (
+    id: string,
+    input: { firstName?: string; lastName?: string; isOnboarded?: boolean },
+  ): Promise<IUser | null> => {
+    return await UserModel.findByIdAndUpdate(id, input, { new: true });
+  },
+
   createUser: async (
     input: Pick<IUser, "firstName" | "lastName" | "email" | "password">,
   ): Promise<IUser> => {
