@@ -1,4 +1,8 @@
-import { JWT_ACCESS_EXPIRES_IN, JWT_SECRET } from "@config/env";
+import {
+  JWT_ACCESS_EXPIRES_IN,
+  JWT_SECRET,
+  REFRESH_TOKEN_BYTES,
+} from "@config/env";
 import * as jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 import { generateRandomTokenWithCrypto } from "@utils/generators";
@@ -6,7 +10,6 @@ import { hashWithCrypto } from "@utils/encryptors";
 import { IUser } from "@modules/user/user.types";
 import { AccessPayload } from "../auth.types";
 import { DEFAULT_REFRESH_DAYS } from "@config/constants";
-import { convertTimeToMilliseconds } from "@utils/index";
 import { RefreshTokenModel } from "../refreshToken.model";
 import UserService from "@modules/user/user.service";
 
@@ -25,9 +28,7 @@ export async function createTokensForUser(
     email: user.email,
   });
 
-  const rawRefreshToken = generateRandomTokenWithCrypto(
-    Number(process.env.REFRESH_TOKEN_BYTES || 64),
-  );
+  const rawRefreshToken = generateRandomTokenWithCrypto(REFRESH_TOKEN_BYTES);
   const tokenHash = hashWithCrypto(rawRefreshToken);
 
   const expiresAt = new Date(
@@ -40,6 +41,7 @@ export async function createTokensForUser(
     expiresAt,
     createdByIp: ip,
     userAgent,
+    rememberMe,
   });
 
   return {
@@ -56,12 +58,23 @@ export async function rotateRefreshToken(
   userAgent?: string,
 ) {
   const oldHash = hashWithCrypto(oldToken);
-  const existing = await RefreshTokenModel.findOne({ tokenHash: oldHash });
 
-  if (!existing || existing.revokedAt) {
-    if (existing && existing.revokedAt) {
+  // Atomically revoke the token if it is still active.
+  // Using findOneAndUpdate as the atomic gate eliminates the race condition
+  // where two concurrent requests could both pass the revokedAt === null check.
+  const existing = await RefreshTokenModel.findOneAndUpdate(
+    { tokenHash: oldHash, revokedAt: null },
+    { $set: { revokedAt: new Date(), revokedByIp: ip } },
+    { new: false },
+  );
+
+  if (!existing) {
+    // Token not found or already revoked — check whether this is a reuse attack.
+    const doc = await RefreshTokenModel.findOne({ tokenHash: oldHash });
+    if (doc?.revokedAt) {
+      // A previously valid token is being replayed — revoke the entire family.
       await RefreshTokenModel.updateMany(
-        { user: existing.user, revokedAt: null },
+        { user: doc.user, revokedAt: null },
         { revokedAt: new Date(), reason: "reused" },
       );
     }
@@ -69,20 +82,23 @@ export async function rotateRefreshToken(
   }
 
   if (existing.expiresAt < new Date()) {
-    await existing.updateOne({
-      revokedAt: new Date(),
-      reason: "expired",
-    });
+    await RefreshTokenModel.updateOne(
+      { _id: existing._id },
+      { reason: "expired" },
+    );
     throw new Error("Refresh token expired");
   }
+
   const user = await UserService.getUserById(existing.user.toString());
   if (!user) throw new Error("User not found!");
-  const rawRefreshToken = generateRandomTokenWithCrypto(
-    Number(process.env.REFRESH_TOKEN_BYTES || 64),
-  );
+
+  const rawRefreshToken = generateRandomTokenWithCrypto(REFRESH_TOKEN_BYTES);
   const newHash = hashWithCrypto(rawRefreshToken);
+
+  // Preserve the original session length the user chose at login.
+  const rememberMe = existing.rememberMe ?? false;
   const expiresAt = new Date(
-    Date.now() + convertTimeToMilliseconds(720, "hours"),
+    Date.now() + (rememberMe ? DEFAULT_REFRESH_DAYS : 7) * 24 * 60 * 60 * 1000,
   );
 
   const session = await mongoose.startSession();
@@ -97,15 +113,18 @@ export async function rotateRefreshToken(
           expiresAt,
           createdByIp: ip,
           userAgent,
+          rememberMe,
         },
       ],
       { session },
     );
 
-    existing.revokedAt = new Date();
-    existing.revokedByIp = ip as string;
-    existing.replacedByToken = newRefreshToken[0]?._id?.toString() as string;
-    await existing.save({ session });
+    // Update the old token's chain pointer and reason inside the transaction.
+    await RefreshTokenModel.updateOne(
+      { _id: existing._id },
+      { replacedByToken: newRefreshToken[0]?._id, reason: "rotated" },
+      { session },
+    );
 
     await session.commitTransaction();
 
@@ -114,7 +133,7 @@ export async function rotateRefreshToken(
       refreshTokenId: newRefreshToken[0]?._id,
       accessToken: generateAccessToken({
         id: user._id.toString(),
-        email: user?.email,
+        email: user.email,
       }),
       expiresAt,
     };
@@ -124,7 +143,7 @@ export async function rotateRefreshToken(
     }
     throw err;
   } finally {
-    session.endSession();
+    await session.endSession();
   }
 }
 

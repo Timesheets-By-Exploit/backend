@@ -10,16 +10,13 @@ import {
 import { IUser } from "@modules/user/user.types";
 import { sendEmailWithTemplate } from "@services/email.service";
 import { ISuccessPayload, IErrorPayload } from "src/types";
-import { hashWithCrypto } from "@utils/encryptors";
 import { RefreshTokenModel } from "./refreshToken.model";
-import { DEFAULT_REFRESH_DAYS } from "@config/constants";
-import { generateRandomTokenWithCrypto } from "@utils/generators";
 import {
   EMAIL_VERIFICATION_TEMPLATE_KEY,
   PASSWORD_RESET_TEMPLATE_KEY,
 } from "@config/env";
 import {
-  generateAccessToken,
+  createTokensForUser,
   rotateRefreshToken,
   revokeRefreshToken,
 } from "./utils/auth.tokens";
@@ -74,8 +71,11 @@ const AuthService = {
         mail_template_key: EMAIL_VERIFICATION_TEMPLATE_KEY,
         template_alias: "email-verification",
       });
+      if (!emailSentResponse.success) {
+        return { success: false, error: "Failed to send verification email" };
+      }
       return {
-        success: emailSentResponse.success,
+        success: true,
         data: { emailSent: emailSentResponse.emailSent || false },
       };
     } catch (err) {
@@ -116,42 +116,23 @@ const AuthService = {
       userAgent?: string | undefined;
     },
   ) => {
-    const accessToken = generateAccessToken({
-      id: user._id.toString(),
-      email: user.email,
-    });
-
-    const rawRefreshToken = generateRandomTokenWithCrypto(
-      Number(process.env.REFRESH_TOKEN_BYTES || 64),
-    );
-    const tokenHash = hashWithCrypto(rawRefreshToken);
-
-    const expiresAt = new Date(
-      Date.now() +
-        (rememberMe ? DEFAULT_REFRESH_DAYS : 7) * 24 * 60 * 60 * 1000,
-    );
-
-    const refreshDoc = await RefreshTokenModel.create({
-      user: user._id,
-      tokenHash,
-      expiresAt,
-      createdByIp: metaData?.ip,
-      userAgent: metaData?.userAgent,
-    });
+    const { accessToken, refreshToken, refreshTokenId, expiresAt } =
+      await createTokensForUser(
+        user,
+        rememberMe,
+        metaData?.ip,
+        metaData?.userAgent,
+      );
 
     return {
       success: true,
-      data: {
-        accessToken,
-        refreshToken: rawRefreshToken,
-        refreshTokenId: refreshDoc._id,
-        expiresAt,
-      },
+      data: { accessToken, refreshToken, refreshTokenId, expiresAt },
     };
   },
   rotateRefreshToken: async (
     rawRefreshToken: string,
     ip?: string,
+    userAgent?: string,
   ): Promise<
     | {
         success: true;
@@ -166,7 +147,7 @@ const AuthService = {
   > => {
     try {
       const { refreshToken, refreshTokenId, expiresAt, accessToken } =
-        await rotateRefreshToken(rawRefreshToken, ip);
+        await rotateRefreshToken(rawRefreshToken, ip, userAgent);
 
       return {
         success: true,
@@ -221,6 +202,12 @@ const AuthService = {
 
       user.password = newPassword;
       await user.save();
+
+      // Invalidate all active sessions so a compromised token can't be reused.
+      await RefreshTokenModel.updateMany(
+        { user: user._id, revokedAt: null },
+        { revokedAt: new Date(), reason: "password_changed" },
+      );
 
       return {
         success: true,
@@ -312,6 +299,12 @@ const AuthService = {
       await user.clearPasswordResetData();
       user.password = newPassword;
       await user.save();
+
+      // Invalidate all active sessions so a compromised token can't be reused.
+      await RefreshTokenModel.updateMany(
+        { user: user._id, revokedAt: null },
+        { revokedAt: new Date(), reason: "password_reset" },
+      );
 
       return {
         success: true,

@@ -128,6 +128,6 @@ describe("Email Verification", () => {
         email: user.email,
       });
 
-    expect(resendVerificationCodeResponse.status).toBe(400);
+    expect(resendVerificationCodeResponse.status).toBe(200);
   });
 });

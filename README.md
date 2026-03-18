@@ -36,6 +36,37 @@ npm run dev
 
 ---
 
+## Security
+
+### Authentication & Session Management
+
+- **JWT access tokens** are short-lived (configured via `JWT_ACCESS_EXPIRES_IN`) and stored in signed `httpOnly` cookies.
+- **Refresh tokens** are stored as SHA-256 hashes in MongoDB. The raw token is only ever held in the cookie — never persisted.
+- **Token rotation** issues a new refresh token on every `/api/v1/auth/refresh` call (`POST`). The old token is atomically revoked via `findOneAndUpdate` to prevent race conditions between concurrent requests.
+- **Token reuse detection** — if a previously rotated (already-revoked) token is replayed, the entire token family for that user is revoked immediately.
+- **`rememberMe` preference** is persisted on the `RefreshToken` document and honoured on every rotation; a short-session user is never silently upgraded to a long-lived token.
+- **Password change / reset** revokes all active refresh tokens for the user, preventing session hijacking after an account takeover.
+- **OTP codes** are generated with `crypto.randomInt` (CSPRNG), not `Math.random`.
+- **Expired tokens** are automatically purged from MongoDB via a TTL index on `RefreshToken.expiresAt`.
+
+### Rate Limiting
+
+| Scope | Limit |
+|---|---|
+| Global (all routes) | 100 req / 15 min |
+| Auth-sensitive routes (`/login`, `/forgot-password`, `/reset-password`, `/verify-email`, `/resend-verification-email`) | 10 req / 15 min |
+
+Rate limiting is disabled in the `test` environment.
+
+### Other
+
+- **CORS** rejects disallowed origins with an error (not a silent `false`), returning a proper 4xx to non-browser clients.
+- **Error responses** never leak internal error messages or stack traces outside of the `development` environment.
+- **`REFRESH_TOKEN_BYTES`** is validated at startup via Zod (`min: 32`) to prevent trivially weak tokens from being issued through misconfiguration.
+- **`/api/v1/auth/resend-verification-email`** returns a uniform success response regardless of whether the email exists, preventing user enumeration.
+
+---
+
 ## Git Workflow
 
 ### 1. Create a New Branch

@@ -1,4 +1,5 @@
 import mongoose, { CallbackError, Schema } from "mongoose";
+import crypto from "crypto";
 import { IUser } from "./user.types";
 import { hashWithBcrypt, hashWithCrypto } from "@utils/encryptors";
 import { convertTimeToMilliseconds } from "@utils/index";
@@ -19,6 +20,7 @@ const userSchema = new Schema<IUser>(
       ref: "TimeEntry",
       default: null,
     },
+    isOnboarded: { type: Boolean, default: false },
   },
   { timestamps: true },
 );
@@ -63,7 +65,7 @@ userSchema.pre("save", async function (next) {
 });
 
 function generateAndHashSixDigitCode(): { code: string; hashedCode: string } {
-  const code = Math.floor(100000 + Math.random() * 900000).toString();
+  const code = crypto.randomInt(100000, 1000000).toString();
   const hashedCode = hashWithCrypto(code);
   return { code, hashedCode };
 }

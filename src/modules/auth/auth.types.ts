@@ -17,9 +17,10 @@ export interface IRefreshTokenDoc extends Document {
   createdAt: Date;
   createdByIp?: string;
   userAgent?: string;
+  rememberMe?: boolean;
   revokedAt?: Date | null;
   revokedByIp?: string | null;
-  replacedByToken?: string | null;
+  replacedByToken?: mongoose.Types.ObjectId | null;
   reason?: string | null;
 }
 

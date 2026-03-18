@@ -8,6 +8,7 @@ const RefreshTokenSchema = new Schema<IRefreshTokenDoc>({
   createdAt: { type: Date, default: () => new Date() },
   createdByIp: { type: String },
   userAgent: { type: String },
+  rememberMe: { type: Boolean, default: false },
   revokedAt: { type: Date, default: null },
   revokedByIp: { type: String, default: null },
   replacedByToken: {
@@ -17,6 +18,8 @@ const RefreshTokenSchema = new Schema<IRefreshTokenDoc>({
   },
   reason: { type: String, default: null },
 });
+
+RefreshTokenSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
 export const RefreshTokenModel = mongoose.model<IRefreshTokenDoc>(
   "RefreshToken",
