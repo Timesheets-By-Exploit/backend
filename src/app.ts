@@ -55,7 +55,7 @@ app.use(
   }),
 );
 app.use(cookieParser(COOKIE_SECRET));
-app.use(express.json());
+app.use(express.json({ limit: "100kb" }));
 app.use(httpLogger);
 
 app.use(
