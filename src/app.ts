@@ -48,7 +48,7 @@ app.use(
       if (!origin || origin === FRONTEND_BASE_URL) {
         callback(null, true);
       } else {
-        callback(null, false);
+        callback(new Error("Not allowed by CORS"));
       }
     },
     credentials: true,
