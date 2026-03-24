@@ -64,7 +64,7 @@ describe("Email Verification", () => {
     expect(verifyEmailRes.body.success).toBe(false);
   });
 
-  it("should verify user's email after signup", async () => {
+  it("should verify user's email after signup and sign them in", async () => {
     const user = UserFactory.generate();
 
     await request(app).post("/api/v1/auth/signup").send(user);
@@ -78,6 +78,63 @@ describe("Email Verification", () => {
 
     expect(verifyEmailRes.status).toBe(200);
     expect(verifyEmailRes.body.success).toBe(true);
+
+    // Should return user data
+    expect(verifyEmailRes.body.data.user).toBeDefined();
+    expect(verifyEmailRes.body.data.user.email).toBe(user.email.toLowerCase());
+    expect(verifyEmailRes.body.data.user.isEmailVerified).toBe(true);
+
+    // Should set auth cookies
+    const cookies = verifyEmailRes.headers["set-cookie"];
+    expect(cookies).toBeDefined();
+    const cookieArray = Array.isArray(cookies) ? cookies : [cookies];
+    const access = cookieArray.find((c: string) =>
+      c.startsWith("access_token="),
+    );
+    const refresh = cookieArray.find((c: string) =>
+      c.startsWith("refresh_token="),
+    );
+
+    expect(access).toContain("HttpOnly");
+    expect(access).toContain("SameSite=Lax");
+    expect(access).toContain("Path=/");
+
+    expect(refresh).toContain("HttpOnly");
+    expect(refresh).toContain("SameSite=Lax");
+    expect(refresh).toContain("Path=/auth/refresh");
+  });
+
+  it("should allow access to protected routes after email verification without separate login", async () => {
+    const user = UserFactory.generate();
+
+    await request(app).post("/api/v1/auth/signup").send(user);
+
+    const verifyEmailRes = await request(app)
+      .post("/api/v1/auth/verify-email")
+      .send({
+        email: user.email,
+        emailVerificationCode: getVerificationCode(),
+      });
+
+    expect(verifyEmailRes.status).toBe(200);
+
+    // Extract the access_token cookie from the verify response
+    const cookies = verifyEmailRes.headers["set-cookie"];
+    const cookieArray = (Array.isArray(cookies) ? cookies : [cookies]).filter(
+      (c): c is string => typeof c === "string",
+    );
+    const accessCookie = cookieArray.find((c: string) =>
+      c.startsWith("access_token="),
+    );
+
+    // Use the cookie to access a protected route
+    const meRes = await request(app)
+      .get("/api/v1/auth/me")
+      .set("Cookie", cookieArray);
+
+    expect(meRes.status).toBe(200);
+    expect(meRes.body.success).toBe(true);
+    expect(meRes.body.data.user.email).toBe(user.email.toLowerCase());
   });
 
   it("should fail if user retries with the same code after being verified", async () => {
@@ -94,6 +151,7 @@ describe("Email Verification", () => {
 
     expect(firstVerificationResponse.status).toBe(200);
     expect(firstVerificationResponse.body.success).toBe(true);
+    expect(firstVerificationResponse.body.data.user).toBeDefined();
 
     const secondVerificationResponse = await request(app)
       .post("/api/v1/auth/verify-email")

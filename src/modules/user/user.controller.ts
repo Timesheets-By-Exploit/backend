@@ -8,7 +8,12 @@ export const updateMe = routeTryCatcher(async (req: Request, res: Response) => {
   const input: UpdateUserInput = req.body;
   const update = Object.fromEntries(
     Object.entries(input).filter(([, v]) => v !== undefined),
-  ) as { firstName?: string; lastName?: string; isOnboarded?: boolean };
+  ) as {
+    firstName?: string;
+    lastName?: string;
+    isOnboarded?: boolean;
+    onboardingStep?: number;
+  };
   const updated = await UserService.updateUser(
     req.user!._id.toString(),
     update,

@@ -8,6 +8,7 @@ type UpdateUserOutput = {
   firstName: string;
   lastName: string;
   isOnboarded: boolean;
+  onboardingStep: number;
   isEmailVerified: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -18,7 +19,7 @@ export type UserApiSpec = Tspec.DefineApiSpec<{
   tags: ["Users"];
   paths: {
     "/me": {
-      put: {
+      patch: {
         summary: "Update the currently authenticated user";
         body: UpdateUserInput;
         responses: {
