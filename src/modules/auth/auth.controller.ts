@@ -41,9 +41,12 @@ export const signup = routeTryCatcher(
 
 export const verifyEmailVerificationCode = routeTryCatcher(
   async (req: Request, res: Response, next: NextFunction) => {
+    const ip = req.ip;
+    const userAgent = req.get("User-Agent") || "";
     const result = await AuthService.verifyEmailVerificationCode(
       req.body.emailVerificationCode,
       req.body.email,
+      { ip, userAgent },
     );
     if (!result.success)
       return next(
@@ -51,9 +54,32 @@ export const verifyEmailVerificationCode = routeTryCatcher(
           (result as IErrorPayload).error || "Email verification failed",
         ),
       );
-    return res
-      .status(200)
-      .json(result as ISuccessPayload<EmailVerificationOutput>);
+
+    const data = (
+      result as ISuccessPayload<
+        EmailVerificationOutput & {
+          accessToken: string;
+          refreshToken: string;
+          refreshTokenExpiresAt: Date;
+        }
+      >
+    ).data;
+
+    setAuthCookies({
+      res,
+      refreshToken: data.refreshToken,
+      refreshTokenExpiresAt: data.refreshTokenExpiresAt,
+      accessToken: data.accessToken,
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        email: data.email,
+        isEmailVerified: data.isEmailVerified,
+        user: data.user,
+      },
+    } as ISuccessPayload<EmailVerificationOutput>);
   },
 );
 

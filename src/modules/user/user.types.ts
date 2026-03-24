@@ -22,4 +22,5 @@ export interface IUser extends mongoose.Document {
   verifyPasswordResetCode: (code: string) => boolean;
   clearPasswordResetData: () => Promise<void>;
   isOnboarded: boolean;
+  onboardingStep: number;
 }

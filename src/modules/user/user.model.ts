@@ -21,6 +21,7 @@ const userSchema = new Schema<IUser>(
       default: null,
     },
     isOnboarded: { type: Boolean, default: false },
+    onboardingStep: { type: Number, default: 0, min: 0, max: 4 },
   },
   { timestamps: true },
 );

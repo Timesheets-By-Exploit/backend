@@ -85,7 +85,20 @@ const AuthService = {
   verifyEmailVerificationCode: async (
     code: string,
     email: string,
-  ): Promise<ISuccessPayload<EmailVerificationOutput> | IErrorPayload> => {
+    metaData?: {
+      ip?: string | undefined;
+      userAgent?: string | undefined;
+    },
+  ): Promise<
+    | ISuccessPayload<
+        EmailVerificationOutput & {
+          accessToken: string;
+          refreshToken: string;
+          refreshTokenExpiresAt: Date;
+        }
+      >
+    | IErrorPayload
+  > => {
     const user = await UserService.getUserByEmail(email);
     if (!user)
       return {
@@ -106,7 +119,28 @@ const AuthService = {
         error: "Verification failed. Please check your email and try again",
       };
     await user.clearEmailVerificationData();
-    return { success: true, data: { email, isEmailVerified: true } };
+
+    // Create auth tokens to sign the user in immediately
+    const tokenResult = await AuthService.createTokensForUser(
+      user,
+      false,
+      metaData,
+    );
+
+    const { serializeUser } = await import("@modules/user/user.utils");
+    const serializedUser = serializeUser(user);
+
+    return {
+      success: true,
+      data: {
+        email,
+        isEmailVerified: true,
+        user: serializedUser as EmailVerificationOutput["user"],
+        accessToken: tokenResult.data.accessToken,
+        refreshToken: tokenResult.data.refreshToken,
+        refreshTokenExpiresAt: tokenResult.data.expiresAt,
+      },
+    };
   },
   createTokensForUser: async (
     user: IUser,

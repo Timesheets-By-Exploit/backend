@@ -16,6 +16,7 @@ export function serializeUser(user: IUser) {
     firstName: obj.firstName,
     lastName: obj.lastName,
     isOnboarded: obj.isOnboarded,
+    onboardingStep: obj.onboardingStep,
   };
 
   return safe;

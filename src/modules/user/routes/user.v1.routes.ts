@@ -6,7 +6,7 @@ import { updateMe } from "../user.controller";
 
 const userRouter = Router();
 
-userRouter.put(
+userRouter.patch(
   "/me",
   authenticate,
   validateResource(updateUserSchema),

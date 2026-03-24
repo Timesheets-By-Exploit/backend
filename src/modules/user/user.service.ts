@@ -12,7 +12,12 @@ const UserService = {
 
   updateUser: async (
     id: string,
-    input: { firstName?: string; lastName?: string; isOnboarded?: boolean },
+    input: {
+      firstName?: string;
+      lastName?: string;
+      isOnboarded?: boolean;
+      onboardingStep?: number;
+    },
   ): Promise<IUser | null> => {
     return await UserModel.findByIdAndUpdate(id, input, { new: true });
   },

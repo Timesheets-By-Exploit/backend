@@ -38,6 +38,7 @@ export type EmailVerificationInput = z.infer<typeof verifyEmailSchema>;
 export type EmailVerificationOutput = {
   email: string;
   isEmailVerified: boolean;
+  user: LoginOutput["user"];
 };
 
 export type resendEmailVerificationCodeInput = z.infer<
@@ -52,6 +53,8 @@ export type LoginOutput = {
     firstName: string;
     lastName: string;
     role: string;
+    isOnboarded: boolean;
+    onboardingStep: number;
     createdAt: string;
     updatedAt: string;
   };
@@ -70,6 +73,8 @@ export type GetMeOutput = {
     firstName: string;
     lastName: string;
     role: string;
+    isOnboarded: boolean;
+    onboardingStep: number;
     isEmailVerified: boolean;
     createdAt: Date;
     updatedAt: Date;
