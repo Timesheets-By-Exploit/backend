@@ -5,7 +5,6 @@ import cors from "cors";
 import { httpLogger } from "@config/logger";
 import v1Router from "./routes/v1.route";
 import errorHandler from "./middlewares/errorHandler";
-import { notFound } from "./middlewares/notFound";
 import cookieParser from "cookie-parser";
 import { COOKIE_SECRET, FRONTEND_BASE_URL, NODE_ENV } from "@config/env";
 import swaggerUi from "swagger-ui-express";
@@ -41,19 +40,19 @@ const authLimiter = rateLimit({
 
 app.set("trust proxy", 1);
 app.use(helmet());
-app.use(limiter);
 app.use(
   cors({
     origin: (origin, callback) => {
       if (!origin || origin === FRONTEND_BASE_URL) {
         callback(null, true);
       } else {
-        callback(new Error("Not allowed by CORS"));
+        callback(null, false);
       }
     },
     credentials: true,
   }),
 );
+app.use(limiter);
 app.use(cookieParser(COOKIE_SECRET));
 app.use(express.json({ limit: "100kb" }));
 app.use(httpLogger);
@@ -77,7 +76,6 @@ app.get("/api/health", (req, res) => {
   res.send({ status: "ok" });
 });
 
-app.use(notFound);
 app.use((err: Error, req: Request, res: Response, next: NextFunction) =>
   errorHandler(err, req, res, next),
 );
