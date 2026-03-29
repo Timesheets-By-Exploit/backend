@@ -24,3 +24,28 @@ export const inviteMemberSchema = z.object({
 export const acceptInviteSchema = z.object({
   token: z.string({ required_error: "Token is required" }),
 });
+
+export const updateOrganizationSchema = z.object({
+  name: z
+    .string()
+    .min(2, "Organization name must be at least 2 characters long")
+    .max(100, "Organization name must not exceed 100 characters")
+    .optional(),
+  domain: z.string().optional(),
+  description: z
+    .string()
+    .max(500, "Description must not exceed 500 characters")
+    .optional(),
+  status: z.enum(["ACTIVE", "INACTIVE"]).optional(),
+  size: z
+    .number()
+    .int()
+    .min(1, "Organization size must be at least 1")
+    .optional(),
+  settings: z
+    .object({
+      timezone: z.string().optional(),
+      workHours: z.number().int().min(1).optional(),
+    })
+    .optional(),
+});

@@ -8,6 +8,7 @@ import {
   createOrganizationSchema,
   inviteMemberSchema,
   acceptInviteSchema,
+  updateOrganizationSchema,
 } from "../organization.validators";
 import {
   createOrganization,
@@ -15,6 +16,7 @@ import {
   getOrganizationMembers,
   inviteMember,
   acceptInvite,
+  updateOrganization,
 } from "../organization.controller";
 
 const organizationRouter = Router();
@@ -27,6 +29,14 @@ organizationRouter.post(
 );
 
 organizationRouter.get("/", authenticate, getOrganization);
+
+organizationRouter.put(
+  "/",
+  authenticate,
+  requireRole([USER_ROLES.OWNER, USER_ROLES.MANAGER]),
+  validateResource(updateOrganizationSchema),
+  updateOrganization,
+);
 
 organizationRouter.get(
   "/members",

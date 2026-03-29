@@ -3,6 +3,7 @@ import { z } from "zod";
 import {
   createOrganizationSchema,
   acceptInviteSchema,
+  updateOrganizationSchema,
 } from "./organization.validators";
 import { OrgStatus, UserRole } from "@constants";
 
@@ -84,6 +85,26 @@ export type InviteMemberOutput = {
 export type GetUserOrganizationOutput = {
   organization: IOrganization;
   role: string | UserRole;
+};
+
+export type UpdateOrganizationInput = z.infer<typeof updateOrganizationSchema>;
+
+export type UpdateOrganizationOutput = {
+  organization: {
+    id: string;
+    name: string;
+    slug: string;
+    domain?: string;
+    description?: string;
+    status: OrgStatus;
+    size: number;
+    settings: {
+      timezone: string;
+      workHours: number;
+    };
+    createdAt: Date;
+    updatedAt: Date;
+  };
 };
 
 export type PendingMembershipData = {
