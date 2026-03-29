@@ -41,19 +41,19 @@ const authLimiter = rateLimit({
 
 app.set("trust proxy", 1);
 app.use(helmet());
-app.use(limiter);
 app.use(
   cors({
     origin: (origin, callback) => {
       if (!origin || origin === FRONTEND_BASE_URL) {
         callback(null, true);
       } else {
-        callback(new Error("Not allowed by CORS"));
+        callback(null, false);
       }
     },
     credentials: true,
   }),
 );
+app.use(limiter);
 app.use(cookieParser(COOKIE_SECRET));
 app.use(express.json({ limit: "100kb" }));
 app.use(httpLogger);

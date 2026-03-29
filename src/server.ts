@@ -17,6 +17,13 @@ process.on("unhandledRejection", (reason) => {
 });
 
 process.on("uncaughtException", (err) => {
+  if (err && (err as NodeJS.ErrnoException).code === "ERR_HTTP_HEADERS_SENT") {
+    logger.warn(
+      { err },
+      "Suppressed ERR_HTTP_HEADERS_SENT (headers already sent)",
+    );
+    return;
+  }
   logger.fatal({ err }, "Uncaught Exception — shutting down");
   gracefulShutdown(1);
 });
