@@ -8,9 +8,12 @@ const errorHandler = (
   err: unknown,
   _req: Request,
   res: Response,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  next?: NextFunction,
+  next: NextFunction,
 ) => {
+  if (res.headersSent) {
+    return next(err);
+  }
+
   if (err instanceof AppError) {
     return res.status(err.statusCode).json({
       success: false,
