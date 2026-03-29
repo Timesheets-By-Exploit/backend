@@ -10,6 +10,9 @@ import {
   GetOrganizationMembersOutput,
   InviteMemberOutput,
   GetUserOrganizationOutput,
+  UpdateOrganizationInput,
+  UpdateOrganizationOutput,
+  IOrganization,
 } from "./organization.types";
 import AppError from "@utils/AppError";
 import { IErrorPayload, ISuccessPayload } from "src/types";
@@ -139,6 +142,47 @@ export const inviteMember = routeTryCatcher(
     return res.status(201).json({
       success: true,
       message: "Invitation sent successfully",
+      data: output,
+    });
+  },
+);
+
+export const updateOrganization = routeTryCatcher(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const input: UpdateOrganizationInput = req.body;
+    const orgId = req.userOrg!._id.toString();
+
+    const result = await OrganizationService.updateOrganization(orgId, input);
+
+    if ((result as IErrorPayload).error) {
+      const error = (result as IErrorPayload).error;
+      if (error === "Organization not found")
+        return next(AppError.notFound(error));
+      return next(AppError.badRequest(error || "Organization update failed"));
+    }
+
+    const organization = (result as ISuccessPayload<IOrganization>).data;
+
+    const output: UpdateOrganizationOutput = {
+      organization: {
+        id: organization._id.toString(),
+        name: organization.name,
+        slug: organization.slug,
+        ...(organization.domain && { domain: organization.domain }),
+        ...(organization.description && {
+          description: organization.description,
+        }),
+        status: organization.status,
+        size: organization.size,
+        settings: organization.settings,
+        createdAt: organization.createdAt,
+        updatedAt: organization.updatedAt,
+      },
+    };
+
+    return res.status(200).json({
+      success: true,
+      message: "Organization updated successfully",
       data: output,
     });
   },

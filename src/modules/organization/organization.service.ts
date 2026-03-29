@@ -11,6 +11,7 @@ import {
   InviteMemberOutput,
   GetUserOrganizationOutput,
   PendingMembershipData,
+  UpdateOrganizationInput,
 } from "./organization.types";
 import { ISuccessPayload, IErrorPayload } from "src/types";
 import { generateRandomTokenWithCrypto } from "@utils/generators";
@@ -205,6 +206,27 @@ const OrganizationService = {
         success: false,
         error: (err as Error).message,
       };
+    }
+  },
+
+  updateOrganization: async (
+    orgId: string,
+    input: UpdateOrganizationInput,
+  ): Promise<ISuccessPayload<IOrganization> | IErrorPayload> => {
+    try {
+      const organization = await OrganizationModel.findByIdAndUpdate(
+        orgId,
+        { $set: input },
+        { new: true, runValidators: true },
+      );
+
+      if (!organization) {
+        return { success: false, error: "Organization not found" };
+      }
+
+      return { success: true, data: organization };
+    } catch (err) {
+      return { success: false, error: (err as Error).message };
     }
   },
 
